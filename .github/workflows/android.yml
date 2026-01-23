@@ -1,0 +1,126 @@
+name: Android CI
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (例如: 1.2.0)'
+        required: true
+        default: '1.0.0'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/v}"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "版本号: $VERSION"
+        
+        # 计算 versionCode (基于版本号)
+        IFS='.' read -r major minor patch <<< "$VERSION"
+        VERSION_CODE=$((major * 10000 + minor * 100 + patch))
+        echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "versionCode: $VERSION_CODE"
+
+    - name: Update version in build.gradle.kts
+      run: |
+        sed -i "s/versionCode = [0-9]*/versionCode = ${{ steps.version.outputs.VERSION_CODE }}/" app/build.gradle.kts
+        sed -i "s/versionName = \"[^\"]*\"/versionName = \"${{ steps.version.outputs.VERSION }}\"/" app/build.gradle.kts
+        echo "更新后的版本配置:"
+        grep -E "versionCode|versionName" app/build.gradle.kts
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Generate Gradle Wrapper
+      run: gradle wrapper --gradle-version 9.3
+
+    - name: Decode Keystore
+      env:
+        RELEASE_KEYSTORE_FILE: ${{ secrets.RELEASE_KEYSTORE_FILE }}
+      run: |
+        echo "$RELEASE_KEYSTORE_FILE" | base64 -d > app/keystore.jks
+
+    - name: Build Release APK
+      env:
+        RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+        RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+        RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+      run: ./gradlew assembleRelease
+
+    - name: Rename APK
+      run: |
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/QRX-v${{ steps.version.outputs.VERSION }}-arm64-v8a.apk
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: QRX-v${{ steps.version.outputs.VERSION }}
+        path: app/build/outputs/apk/release/QRX-*.apk
+
+    - name: Delete all previous releases
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "删除所有旧版本..."
+        releases=$(gh release list --json tagName -q '.[].tagName' 2>/dev/null || echo "")
+        if [ -n "$releases" ]; then
+          for tag in $releases; do
+            echo "删除 release: $tag"
+            gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          done
+        fi
+        echo "旧版本清理完成"
+
+    - name: Delete old workflow runs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "删除旧的 workflow runs..."
+        REPO="${{ github.repository }}"
+        CURRENT_RUN_ID="${{ github.run_id }}"
+        
+        # 获取所有 workflow runs (除了当前的)
+        gh api "repos/$REPO/actions/runs" --paginate -q '.workflow_runs[] | select(.id != '"$CURRENT_RUN_ID"') | .id' | while read run_id; do
+          echo "删除 run: $run_id"
+          gh api -X DELETE "repos/$REPO/actions/runs/$run_id" 2>/dev/null || true
+        done
+        echo "Workflow runs 清理完成"
+
+    - name: Create Pre-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "v${{ steps.version.outputs.VERSION }}" \
+          --title "QRX v${{ steps.version.outputs.VERSION }}" \
+          --prerelease \
+          --generate-notes \
+          app/build/outputs/apk/release/QRX-*.apk

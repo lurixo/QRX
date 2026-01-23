@@ -1,0 +1,54 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- 左上角定位框 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M2,2h7v2.5h-4.5v4.5h-2.5z"/>
+    
+    <!-- 右上角定位框 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,2v7h-2.5v-4.5h-4.5v-2.5z"/>
+    
+    <!-- 左下角定位框 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M2,22v-7h2.5v4.5h4.5v2.5z"/>
+    
+    <!-- 右下角定位框 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,22h-7v-2.5h4.5v-4.5h2.5z"/>
+    
+    <!-- 二维码图案 - 左上 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,6h4v4h-4zM7.2,7.2v1.6h1.6v-1.6z"/>
+    
+    <!-- 二维码图案 - 右上 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,6h4v4h-4zM15.2,7.2v1.6h1.6v-1.6z"/>
+    
+    <!-- 二维码图案 - 左下 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M6,14h4v4h-4zM7.2,15.2v1.6h1.6v-1.6z"/>
+    
+    <!-- 二维码图案 - 右下散点 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14,14h2v2h-2z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M17,17h2v2h-2z"/>
+    
+    <!-- 扫描线 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,11.5h18v1h-18z"/>
+</vector>
