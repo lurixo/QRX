@@ -338,14 +338,16 @@ fun CameraScanScreen(
                                                             isPaused = true
                                                         }
                                                     }
+                                                } else {
+                                                    consecutiveEmptyFrames++
+                                                    if (consecutiveEmptyFrames > 20 && currentZoomRatio < 2.5f) {
+                                                        currentZoomRatio = (currentZoomRatio + 0.25f).coerceAtMost(2.5f)
+                                                        camera?.cameraControl?.setZoomRatio(currentZoomRatio)
+                                                        consecutiveEmptyFrames = 0
+                                                    }
                                                 }
                                             } else if (scannedCode == null && !isPaused) {
-                                                consecutiveEmptyFrames++
-                                                if (consecutiveEmptyFrames > 45 && currentZoomRatio < 2.0f) {
-                                                    currentZoomRatio = (currentZoomRatio + 0.1f).coerceAtMost(2.0f)
-                                                    camera?.cameraControl?.setZoomRatio(currentZoomRatio)
-                                                    consecutiveEmptyFrames = 0
-                                                }
+                                                consecutiveEmptyFrames = 0
                                             }
                                         }
                                         .addOnCompleteListener {
