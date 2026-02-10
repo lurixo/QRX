@@ -1,6 +1,7 @@
 package io.qrx.scan
 
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -19,6 +20,18 @@ class ImageScanActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val uris = mutableListOf<Uri>()
+        intent.clipData?.let { clip ->
+            for (i in 0 until clip.itemCount) {
+                clip.getItemAt(i).uri?.let { uris.add(it) }
+            }
+        }
+
+        if (uris.isEmpty()) {
+            finish()
+            return
+        }
+
         setContent {
             val isDark = isSystemInDarkTheme()
 
@@ -32,6 +45,7 @@ class ImageScanActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     ImageScanScreen(
+                        initialUris = uris,
                         onNavigateBack = { finish() }
                     )
                 }

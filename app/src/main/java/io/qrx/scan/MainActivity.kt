@@ -36,9 +36,6 @@ class MainActivity : ComponentActivity() {
                         onNavigateToHistory = {
                             startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
                         },
-                        onNavigateToImageScan = {
-                            startActivity(Intent(this@MainActivity, ImageScanActivity::class.java))
-                        },
                         onNavigateToQRGenerate = {
                             startActivity(Intent(this@MainActivity, QRCodeGenerateActivity::class.java))
                         },

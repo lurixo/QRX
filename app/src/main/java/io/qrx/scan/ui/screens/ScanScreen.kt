@@ -1,6 +1,10 @@
 package io.qrx.scan.ui.screens
 
+import android.content.ClipData
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.qrx.scan.ImageScanActivity
 import io.qrx.scan.R
 import io.qrx.scan.ScanActivity
 import io.qrx.scan.ui.animation.MD3StateAnimations
@@ -44,11 +49,23 @@ import io.qrx.scan.ui.components.MD3ActionButton
 @Composable
 fun ScanScreen(
     onNavigateToHistory: () -> Unit,
-    onNavigateToImageScan: () -> Unit,
     onNavigateToQRGenerate: () -> Unit,
     onNavigateToBarcodeGenerate: () -> Unit
 ) {
     val context = LocalContext.current
+
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(100)
+    ) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        val intent = Intent(context, ImageScanActivity::class.java).apply {
+            val clip = ClipData.newRawUri(null, uris.first())
+            uris.drop(1).forEach { uri -> clip.addItem(ClipData.Item(uri)) }
+            clipData = clip
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(intent)
+    }
 
     Scaffold(
         topBar = {
@@ -129,7 +146,9 @@ fun ScanScreen(
                             icon = Icons.Outlined.Photo,
                             text = stringResource(R.string.select_image),
                             modifier = Modifier.weight(1f),
-                            onClick = onNavigateToImageScan
+                            onClick = {
+                                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }
                         )
                     }
 

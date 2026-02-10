@@ -47,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,6 +104,7 @@ fun copyImageToInternal(context: Context, uri: Uri): String? {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageScanScreen(
+    initialUris: List<Uri>,
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -122,7 +122,6 @@ fun ImageScanScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    var hasLaunchedPicker by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -223,20 +222,13 @@ fun ImageScanScreen(
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(100)
     ) { uris ->
-        if (uris.isEmpty()) {
-            if (scanResults.isEmpty()) {
-                onNavigateBack()
-            }
-            return@rememberLauncherForActivityResult
+        if (uris.isNotEmpty()) {
+            processImages(uris)
         }
-        processImages(uris)
     }
 
     LaunchedEffect(Unit) {
-        if (!hasLaunchedPicker) {
-            hasLaunchedPicker = true
-            photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }
+        processImages(initialUris)
     }
 
     fun exitSelectionMode() {
