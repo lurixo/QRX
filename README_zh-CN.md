@@ -59,7 +59,7 @@
 | KSP | 2.3.5 |
 | Jetpack Compose BOM | 2026.01.01 |
 | CameraX | 1.5.3 |
-| ML Kit Barcode | 18.3.1 |
+| ML Kit Barcode | 17.3.0 |
 | Room | 2.8.4 |
 | QRX-Barcode | 2.0.0 |
 | Navigation Compose | 2.9.7 |
