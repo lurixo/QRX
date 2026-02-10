@@ -108,7 +108,7 @@ jobs:
 
     - name: Rename APK
       run: |
-        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/QRX-v${{ steps.version.outputs.VERSION }}-arm64-v8a.apk
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/QRX-${{ steps.version.outputs.VERSION }}-arm64-v8a.apk
 
     - name: Create Release
       env:
@@ -118,7 +118,7 @@ jobs:
           echo "Release ${{ steps.version.outputs.VERSION }} 已存在，跳过创建"
         else
           gh release create "${{ steps.version.outputs.VERSION }}" \
-            --title "QRX v${{ steps.version.outputs.VERSION }}" \
+            --title "QRX ${{ steps.version.outputs.VERSION }}" \
             --generate-notes \
             app/build/outputs/apk/release/QRX-*.apk
         fi
