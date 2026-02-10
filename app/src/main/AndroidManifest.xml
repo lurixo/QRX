@@ -33,6 +33,21 @@
         </activity>
         
         <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QRX" />
+
+        <activity
+            android:name=".QRCodeGenerateActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QRX" />
+
+        <activity
+            android:name=".BarcodeGenerateActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QRX" />
+
+        <activity
             android:name=".ScanActivity"
             android:exported="true"
             android:theme="@style/Theme.QRX.Scan"

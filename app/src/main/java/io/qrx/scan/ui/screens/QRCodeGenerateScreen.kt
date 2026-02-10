@@ -1,17 +1,9 @@
 package io.qrx.scan.ui.screens
 
-import android.content.ContentValues
-import android.content.Context
 import android.graphics.Bitmap
-import android.os.Environment
-import android.provider.MediaStore
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -38,13 +30,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.AddCircle
@@ -89,10 +79,12 @@ import io.qrx.scan.data.GenerateType
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
+import io.qrx.scan.ui.animation.MD3StateAnimations
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
 import io.qrx.scan.util.BarcodeGenerator
+import io.qrx.scan.util.saveToGalleryOnly
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -704,8 +696,8 @@ fun QRCodeItemCard(
 
             AnimatedVisibility(
                 visible = item.bitmap != null,
-                enter = MD3FabAnimations.enter(),
-                exit = MD3FabAnimations.exit()
+                enter = MD3StateAnimations.contentEnter(),
+                exit = MD3StateAnimations.contentExit()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -767,31 +759,4 @@ fun QRCodeItemCard(
     }
 }
 
-fun saveToGalleryOnly(context: Context, bitmap: Bitmap, fileName: String): Boolean {
-    return try {
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "$fileName.png")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/QRX")
-            put(MediaStore.Images.Media.IS_PENDING, 1)
-        }
 
-        val uri = context.contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        ) ?: return false
-
-        context.contentResolver.openOutputStream(uri)?.use { stream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        }
-
-        contentValues.clear()
-        contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-        context.contentResolver.update(uri, contentValues, null, null)
-
-        true
-    } catch (e: Exception) {
-        e.printStackTrace()
-        false
-    }
-}

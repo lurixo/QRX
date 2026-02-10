@@ -24,15 +24,19 @@ data class ScanHistoryEntity(
 )
 
 class Converters {
+    companion object {
+        private val gson = Gson()
+    }
+
     @TypeConverter
     fun fromStringList(value: List<String>): String {
-        return Gson().toJson(value)
+        return gson.toJson(value)
     }
 
     @TypeConverter
     fun toStringList(value: String): List<String> {
         val type = object : TypeToken<List<String>>() {}.type
-        return Gson().fromJson(value, type)
+        return gson.fromJson(value, type)
     }
 
     @TypeConverter

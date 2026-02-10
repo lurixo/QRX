@@ -24,10 +24,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -173,8 +169,6 @@ fun CameraScanScreen(
 
     fun saveToHistory(code: String, imageCapture: ImageCapture?) {
         scope.launch(Dispatchers.IO) {
-            var imagePath = ""
-
             if (imageCapture != null) {
                 try {
                     val photoFile = File(
@@ -284,6 +278,10 @@ fun CameraScanScreen(
         }
     }
 
+    BackHandler(enabled = scannedCode != null || detectedBarcodes.isNotEmpty()) {
+        resetScan()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -372,15 +370,15 @@ fun CameraScanScreen(
                                                         }
                                                     }
                                                 } else {
-                                                    consecutiveEmptyFrames++
-                                                    if (consecutiveEmptyFrames > 20 && currentZoomRatio < 2.5f) {
-                                                        currentZoomRatio = (currentZoomRatio + 0.25f).coerceAtMost(2.5f)
-                                                        camera?.cameraControl?.setZoomRatio(currentZoomRatio)
-                                                        consecutiveEmptyFrames = 0
-                                                    }
+                                                    consecutiveEmptyFrames = 0
                                                 }
                                             } else if (scannedCode == null && !isPaused) {
-                                                consecutiveEmptyFrames = 0
+                                                consecutiveEmptyFrames++
+                                                if (consecutiveEmptyFrames > 20 && currentZoomRatio < 2.5f) {
+                                                    currentZoomRatio = (currentZoomRatio + 0.25f).coerceAtMost(2.5f)
+                                                    camera?.cameraControl?.setZoomRatio(currentZoomRatio)
+                                                    consecutiveEmptyFrames = 0
+                                                }
                                             }
                                         }
                                         .addOnCompleteListener {
@@ -520,8 +518,8 @@ fun CameraScanScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp),
-                    enter = fadeIn(MD3Motion.emphasizedDecelerateSpec()),
-                    exit = fadeOut(MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4))
+                    enter = MD3StateAnimations.fadeEnter(),
+                    exit = MD3StateAnimations.fadeExit()
                 ) {
                     scannedCode?.let { code ->
                         ScanResultBottomCard(

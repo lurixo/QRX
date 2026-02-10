@@ -1,10 +1,6 @@
 package io.qrx.scan.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.qrx.scan.ui.animation.MD3Motion
+import io.qrx.scan.ui.animation.MD3SnackbarAnimations
 import kotlinx.coroutines.delay
 
 data class SnackbarData(
@@ -62,10 +59,8 @@ fun QRXSnackbar(
     ) {
         AnimatedVisibility(
             visible = isVisible && snackbarData != null,
-            enter = fadeIn(MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT4)) + 
-                    slideInVertically(MD3Motion.emphasizedDecelerateSpec()) { it },
-            exit = fadeOut(MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT3)) + 
-                   slideOutVertically(MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4)) { it }
+            enter = MD3SnackbarAnimations.enter(),
+            exit = MD3SnackbarAnimations.exit()
         ) {
             snackbarData?.let { data ->
                 Surface(
@@ -98,15 +93,4 @@ fun QRXSnackbar(
             }
         }
     }
-}
-
-@Composable
-fun QRXSnackbarHost(
-    snackbarData: SnackbarData?,
-    onDismiss: () -> Unit
-) {
-    QRXSnackbar(
-        snackbarData = snackbarData,
-        onDismiss = onDismiss
-    )
 }

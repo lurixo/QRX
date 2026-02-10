@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color as ComposeColor
 import io.qrx.scan.ui.screens.CameraScanScreen
 import io.qrx.scan.ui.theme.QRXTheme
 
@@ -26,7 +27,7 @@ class ScanActivity : ComponentActivity() {
             QRXTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = androidx.compose.ui.graphics.Color.Black
+                    color = ComposeColor.Black
                 ) {
                     CameraScanScreen(
                         onNavigateBack = { finish() }

@@ -107,6 +107,10 @@ object MD3Motion {
         const val LONG2 = 500
         const val LONG3 = 550
         const val LONG4 = 600
+        const val EXTRA_LONG1 = 700
+        const val EXTRA_LONG2 = 800
+        const val EXTRA_LONG3 = 900
+        const val EXTRA_LONG4 = 1000
     }
 
     fun <T> standardSpec(durationMillis: Int = Duration.SHORT4): FiniteAnimationSpec<T> =
@@ -121,21 +125,12 @@ object MD3Motion {
     fun <T> emphasizedAccelerateSpec(durationMillis: Int = Duration.MEDIUM2): FiniteAnimationSpec<T> =
         tween(durationMillis, easing = EmphasizedAccelerate)
 
-    /**
-     * MD3 标准按压动画规格
-     * 按下时快速响应，松开时平滑恢复
-     * @param isPressed 当前是否按下状态
-     */
     fun <T> pressSpec(isPressed: Boolean): FiniteAnimationSpec<T> =
         tween(
             durationMillis = if (isPressed) Duration.SHORT2 else Duration.SHORT3,
             easing = EmphasizedDecelerate
         )
 
-    /**
-     * MD3 快速按压动画规格（用于小型交互元素如 IconButton）
-     * @param isPressed 当前是否按下状态
-     */
     fun <T> pressSpecFast(isPressed: Boolean): FiniteAnimationSpec<T> =
         tween(
             durationMillis = if (isPressed) Duration.SHORT1 else Duration.SHORT2,
@@ -178,6 +173,26 @@ object MD3Transitions {
             tween(durationMillis / 3, easing = MD3Motion.StandardAccelerate)
         ))
     }
+
+    fun sharedAxisZ(forward: Boolean, durationMillis: Int = MD3Motion.Duration.MEDIUM2): ContentTransform {
+        val initialScale = if (forward) 0.8f else 1.1f
+        val targetScale = if (forward) 1.1f else 0.8f
+        return (scaleIn(
+            initialScale = initialScale,
+            animationSpec = tween(durationMillis, easing = MD3Motion.EmphasizedDecelerate)
+        ) + fadeIn(
+            tween(durationMillis, easing = MD3Motion.StandardDecelerate)
+        )) togetherWith (scaleOut(
+            targetScale = targetScale,
+            animationSpec = tween(durationMillis, easing = MD3Motion.EmphasizedAccelerate)
+        ) + fadeOut(
+            tween(durationMillis / 3, easing = MD3Motion.StandardAccelerate)
+        ))
+    }
+
+    fun fade(durationMillis: Int = MD3Motion.Duration.SHORT4): ContentTransform =
+        fadeIn(tween(durationMillis, easing = MD3Motion.StandardDecelerate)) togetherWith
+        fadeOut(tween(durationMillis, easing = MD3Motion.StandardAccelerate))
 
     fun containerTransformIn(durationMillis: Int = MD3Motion.Duration.MEDIUM4): EnterTransition =
         fadeIn(tween(durationMillis, easing = MD3Motion.EmphasizedDecelerate)) +
@@ -248,6 +263,12 @@ object MD3ListAnimations {
 }
 
 object MD3StateAnimations {
+    fun fadeEnter(durationMillis: Int = MD3Motion.Duration.SHORT4): EnterTransition =
+        fadeIn(tween(durationMillis, easing = MD3Motion.EmphasizedDecelerate))
+
+    fun fadeExit(durationMillis: Int = MD3Motion.Duration.SHORT3): ExitTransition =
+        fadeOut(tween(durationMillis, easing = MD3Motion.EmphasizedAccelerate))
+
     fun contentEnter(): EnterTransition =
         fadeIn(
             tween(MD3Motion.Duration.MEDIUM2, easing = MD3Motion.EmphasizedDecelerate)
@@ -313,4 +334,18 @@ object MD3DialogAnimations {
             targetScale = 0.9f,
             animationSpec = tween(MD3Motion.Duration.SHORT4, easing = MD3Motion.EmphasizedAccelerate)
         )
+}
+
+object MD3SnackbarAnimations {
+    fun enter(): EnterTransition =
+        fadeIn(tween(MD3Motion.Duration.SHORT4, easing = MD3Motion.EmphasizedDecelerate)) +
+        slideInVertically(
+            animationSpec = tween(MD3Motion.Duration.MEDIUM2, easing = MD3Motion.EmphasizedDecelerate)
+        ) { it }
+
+    fun exit(): ExitTransition =
+        fadeOut(tween(MD3Motion.Duration.SHORT3, easing = MD3Motion.EmphasizedAccelerate)) +
+        slideOutVertically(
+            animationSpec = tween(MD3Motion.Duration.SHORT4, easing = MD3Motion.EmphasizedAccelerate)
+        ) { it }
 }

@@ -1,6 +1,5 @@
 package io.qrx.scan
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,10 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import io.qrx.scan.ui.screens.ScanScreen
+import io.qrx.scan.ui.screens.BarcodeGenerateScreen
 import io.qrx.scan.ui.theme.QRXTheme
 
-class MainActivity : ComponentActivity() {
+class BarcodeGenerateActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -32,16 +31,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ScanScreen(
-                        onNavigateToHistory = {
-                            startActivity(Intent(this@MainActivity, HistoryActivity::class.java))
-                        },
-                        onNavigateToQRGenerate = {
-                            startActivity(Intent(this@MainActivity, QRCodeGenerateActivity::class.java))
-                        },
-                        onNavigateToBarcodeGenerate = {
-                            startActivity(Intent(this@MainActivity, BarcodeGenerateActivity::class.java))
-                        }
+                    BarcodeGenerateScreen(
+                        onNavigateBack = { finish() }
                     )
                 }
             }

@@ -16,8 +16,6 @@ object BarcodeGenerator {
     fun generateQRCode(
         content: String,
         width: Int = 512,
-        height: Int = 512,
-        margin: Int = 1,
         highErrorCorrection: Boolean = true
     ): Bitmap? {
         return try {
@@ -34,8 +32,7 @@ object BarcodeGenerator {
         content: String,
         format: AppBarcodeFormat,
         width: Int = 600,
-        height: Int = 200,
-        margin: Int = 0
+        height: Int = 200
     ): Bitmap? {
         return try {
             val barcodeType = when (format) {

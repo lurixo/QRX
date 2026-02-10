@@ -4,10 +4,6 @@ import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -34,12 +30,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.AddCircle
@@ -86,11 +80,12 @@ import io.qrx.scan.data.GenerateType
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
+import io.qrx.scan.ui.animation.MD3StateAnimations
 import io.qrx.scan.ui.components.MD3SelectionIcon
-import io.qrx.scan.ui.components.MD3TextField
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
 import io.qrx.scan.util.BarcodeGenerator
+import io.qrx.scan.util.saveToGalleryOnly
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -726,8 +721,8 @@ fun BarcodeItemCard(
 
             AnimatedVisibility(
                 visible = item.bitmap != null,
-                enter = MD3FabAnimations.enter(),
-                exit = MD3FabAnimations.exit()
+                enter = MD3StateAnimations.contentEnter(),
+                exit = MD3StateAnimations.contentExit()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),

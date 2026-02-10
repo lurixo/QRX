@@ -5,10 +5,8 @@ import android.content.Intent
 import android.util.Patterns
 import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,14 +21,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.res.stringResource
@@ -61,31 +56,7 @@ import io.qrx.scan.R
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.screens.ScanResult
-
-@Composable
-fun MD3SelectionIconInternal(
-    selected: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val scale by animateFloatAsState(
-        targetValue = if (selected) 1f else 0.9f,
-        animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
-        label = "selectionScale"
-    )
-
-    androidx.compose.animation.Crossfade(
-        targetState = selected,
-        animationSpec = MD3Motion.standardSpec(),
-        label = "selectionCrossfade"
-    ) { isSelected ->
-        Icon(
-            imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-            contentDescription = null,
-            modifier = modifier.scale(scale),
-            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-        )
-    }
-}
+import io.qrx.scan.util.formatTimestamp
 
 private fun isUrl(text: String): Boolean {
     return Patterns.WEB_URL.matcher(text).matches() ||
@@ -154,7 +125,7 @@ fun ScanResultCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isSelectionMode) {
-                    MD3SelectionIconInternal(
+                    MD3SelectionIcon(
                         selected = isSelected,
                         modifier = Modifier.size(24.dp)
                     )
@@ -416,7 +387,7 @@ fun HistoryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isSelectionMode) {
-                    MD3SelectionIconInternal(
+                    MD3SelectionIcon(
                         selected = isSelected,
                         modifier = Modifier.size(24.dp)
                     )
@@ -490,7 +461,4 @@ fun HistoryCard(
     }
 }
 
-private fun formatTimestamp(timestamp: Long): String {
-    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
-    return sdf.format(java.util.Date(timestamp))
-}
+
