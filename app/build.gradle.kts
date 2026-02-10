@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -77,10 +76,6 @@ android {
     }
 }
 
-baselineProfile {
-    dexLayoutOptimization = true
-}
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -104,8 +99,6 @@ dependencies {
     implementation(libs.camera.view)
     implementation(libs.accompanist.permissions)
     implementation(libs.qrx.barcode)
-    implementation(libs.profileinstaller)
-    baselineProfile(project(":baselineprofile"))
     ksp(libs.room.compiler)
     debugImplementation(libs.androidx.ui.tooling)
 }
