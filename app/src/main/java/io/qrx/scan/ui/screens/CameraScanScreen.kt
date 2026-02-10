@@ -104,6 +104,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.common.InputImage
 import io.qrx.scan.QRXApplication
 import io.qrx.scan.R
@@ -154,6 +155,9 @@ fun CameraScanScreen(
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
     var consecutiveEmptyFrames by remember { mutableStateOf(0) }
     var currentZoomRatio by remember { mutableStateOf(1f) }
+    var cameraProviderRef by remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    var previewUseCase by remember { mutableStateOf<Preview?>(null) }
+    var analyzerUseCase by remember { mutableStateOf<ImageAnalysis?>(null) }
 
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -229,12 +233,30 @@ fun CameraScanScreen(
         }
     }
 
-    fun onBarcodeSelected(code: String, imageCapture: ImageCapture?) {
+    fun onBarcodeSelected(code: String) {
         scannedCode = code
         showSuccessAnimation = true
         isPaused = true
-        saveToHistory(code, imageCapture)
         detectedBarcodes = emptyList()
+
+        val provider = cameraProviderRef
+        val preview = previewUseCase
+        if (provider != null && preview != null) {
+            try {
+                val capture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                    .build()
+                provider.unbindAll()
+                camera = provider.bindToLifecycle(
+                    lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, capture
+                )
+                saveToHistory(code, capture)
+            } catch (e: Exception) {
+                saveToHistory(code, null)
+            }
+        } else {
+            saveToHistory(code, null)
+        }
     }
 
     fun resetScan() {
@@ -245,6 +267,21 @@ fun CameraScanScreen(
         consecutiveEmptyFrames = 0
         currentZoomRatio = 1f
         camera?.cameraControl?.setZoomRatio(1f)
+
+        val provider = cameraProviderRef
+        val preview = previewUseCase
+        val analyzer = analyzerUseCase
+        if (provider != null && preview != null && analyzer != null) {
+            try {
+                provider.unbindAll()
+                camera = provider.bindToLifecycle(
+                    lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analyzer
+                )
+                camera?.cameraControl?.setZoomRatio(1f)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     Box(
@@ -256,8 +293,7 @@ fun CameraScanScreen(
             cameraPermissionState.status.isGranted -> {
                 val previewView = remember { PreviewView(context) }
                 val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-                val barcodeScanner = remember { BarcodeScanning.getClient() }
-                var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
+                val barcodeScanner = remember { BarcodeScanning.getClient(BarcodeScannerOptions.Builder().enableAllPotentialBarcodes().build()) }
 
                 DisposableEffect(Unit) {
                     onDispose {
@@ -269,15 +305,12 @@ fun CameraScanScreen(
                     val cameraProvider = withContext(Dispatchers.IO) {
                         ProcessCameraProvider.getInstance(context).get()
                     }
+                    cameraProviderRef = cameraProvider
 
                     val preview = Preview.Builder().build().apply {
                         surfaceProvider = previewView.surfaceProvider
                     }
-
-                    val capture = ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .build()
-                    imageCapture = capture
+                    previewUseCase = preview
 
                     val resolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
                         .setResolutionStrategy(androidx.camera.core.resolutionselector.ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
@@ -312,7 +345,7 @@ fun CameraScanScreen(
                                                     consecutiveEmptyFrames = 0
                                                     if (decodedBarcodes.size == 1) {
                                                         decodedBarcodes[0].rawValue?.let { value ->
-                                                            onBarcodeSelected(value, imageCapture)
+                                                            onBarcodeSelected(value)
                                                         }
                                                     } else {
                                                         val detected = decodedBarcodes.mapNotNull { barcode ->
@@ -358,6 +391,7 @@ fun CameraScanScreen(
                                 }
                             }
                         }
+                    analyzerUseCase = imageAnalyzer
 
                     val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -367,7 +401,6 @@ fun CameraScanScreen(
                             lifecycleOwner,
                             cameraSelector,
                             preview,
-                            capture,
                             imageAnalyzer
                         )
                     } catch (e: Exception) {
@@ -403,7 +436,7 @@ fun CameraScanScreen(
                     detectedBarcodes.forEach { barcode ->
                         BarcodeMarker(
                             barcode = barcode,
-                            onClick = { onBarcodeSelected(barcode.value, imageCapture) }
+                            onClick = { onBarcodeSelected(barcode.value) }
                         )
                     }
 
