@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import androidx.core.net.toUri
 import androidx.activity.compose.BackHandler
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -96,6 +97,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -114,8 +116,10 @@ import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 data class DetectedBarcode(
     val value: String,
@@ -148,6 +152,8 @@ fun CameraScanScreen(
     var isPaused by remember { mutableStateOf(false) }
     var previewSize by remember { mutableStateOf(Pair(1, 1)) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var consecutiveEmptyFrames by remember { mutableStateOf(0) }
+    var currentZoomRatio by remember { mutableStateOf(1f) }
 
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -236,6 +242,9 @@ fun CameraScanScreen(
         showSuccessAnimation = false
         detectedBarcodes = emptyList()
         isPaused = false
+        consecutiveEmptyFrames = 0
+        currentZoomRatio = 1f
+        camera?.cameraControl?.setZoomRatio(1f)
     }
 
     Box(
@@ -256,114 +265,129 @@ fun CameraScanScreen(
                     }
                 }
 
-                AndroidView(
-                    factory = { previewView },
-                    modifier = Modifier.fillMaxSize()
-                ) { view ->
-                    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                    cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
+                LaunchedEffect(Unit) {
+                    val cameraProvider = withContext(Dispatchers.IO) {
+                        ProcessCameraProvider.getInstance(context).get()
+                    }
 
-                        val preview = Preview.Builder().build().also {
-                            it.surfaceProvider = view.surfaceProvider
-                        }
+                    val preview = Preview.Builder().build().apply {
+                        surfaceProvider = previewView.surfaceProvider
+                    }
 
-                        val capture = ImageCapture.Builder()
-                            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                            .build()
-                        imageCapture = capture
+                    val capture = ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build()
+                    imageCapture = capture
 
-                        val resolutionStrategy = androidx.camera.core.resolutionselector.ResolutionStrategy(
-                            android.util.Size(1440, 1080),
-                            androidx.camera.core.resolutionselector.ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
-                        )
-                        val resolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
-                            .setAspectRatioStrategy(androidx.camera.core.resolutionselector.AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY)
-                            .setResolutionStrategy(resolutionStrategy)
-                            .build()
+                    val resolutionSelector = androidx.camera.core.resolutionselector.ResolutionSelector.Builder()
+                        .setResolutionStrategy(androidx.camera.core.resolutionselector.ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                        .build()
 
-                        val imageAnalyzer = ImageAnalysis.Builder()
-                            .setResolutionSelector(resolutionSelector)
-                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-                            .build()
-                            .also { analysis ->
-                                analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                                    if (isPaused) {
-                                        imageProxy.close()
-                                        return@setAnalyzer
-                                    }
+                    val imageAnalyzer = ImageAnalysis.Builder()
+                        .setResolutionSelector(resolutionSelector)
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                        .build()
+                        .apply {
+                            setAnalyzer(cameraExecutor) { imageProxy ->
+                                if (isPaused) {
+                                    imageProxy.close()
+                                    return@setAnalyzer
+                                }
 
-                                    val mediaImage = imageProxy.image
-                                    if (mediaImage != null && scannedCode == null) {
-                                        previewSize = Pair(imageProxy.width, imageProxy.height)
+                                val mediaImage = imageProxy.image
+                                if (mediaImage != null && scannedCode == null) {
+                                    previewSize = Pair(imageProxy.width, imageProxy.height)
 
-                                        val image = InputImage.fromMediaImage(
-                                            mediaImage,
-                                            imageProxy.imageInfo.rotationDegrees
-                                        )
-                                        barcodeScanner.process(image)
-                                            .addOnSuccessListener { barcodes ->
-                                                if (barcodes.isNotEmpty() && scannedCode == null && !isPaused) {
-                                                    val decodedBarcodes = barcodes.filter { it.rawValue != null }
+                                    val image = InputImage.fromMediaImage(
+                                        mediaImage,
+                                        imageProxy.imageInfo.rotationDegrees
+                                    )
+                                    barcodeScanner.process(image)
+                                        .addOnSuccessListener { barcodes ->
+                                            if (barcodes.isNotEmpty() && scannedCode == null && !isPaused) {
+                                                val decodedBarcodes = barcodes.filter { it.rawValue != null }
 
-                                                    if (decodedBarcodes.isNotEmpty()) {
-                                                        if (decodedBarcodes.size == 1) {
-                                                            decodedBarcodes[0].rawValue?.let { value ->
-                                                                onBarcodeSelected(value, imageCapture)
+                                                if (decodedBarcodes.isNotEmpty()) {
+                                                    consecutiveEmptyFrames = 0
+                                                    if (decodedBarcodes.size == 1) {
+                                                        decodedBarcodes[0].rawValue?.let { value ->
+                                                            onBarcodeSelected(value, imageCapture)
+                                                        }
+                                                    } else {
+                                                        val detected = decodedBarcodes.mapNotNull { barcode ->
+                                                            barcode.rawValue?.let { value ->
+                                                                val boundingBox = barcode.boundingBox
+                                                                if (boundingBox != null) {
+                                                                    val centerX = (boundingBox.left + boundingBox.right) / 2f
+                                                                    val centerY = (boundingBox.top + boundingBox.bottom) / 2f
+
+                                                                    val scaleX = screenWidthPx / previewSize.second.toFloat()
+                                                                    val scaleY = screenHeightPx / previewSize.first.toFloat()
+
+                                                                    DetectedBarcode(
+                                                                        value = value,
+                                                                        centerX = centerX * scaleX,
+                                                                        centerY = centerY * scaleY
+                                                                    )
+                                                                } else null
                                                             }
-                                                        } else {
-                                                            val detected = decodedBarcodes.mapNotNull { barcode ->
-                                                                barcode.rawValue?.let { value ->
-                                                                    val boundingBox = barcode.boundingBox
-                                                                    if (boundingBox != null) {
-                                                                        val centerX = (boundingBox.left + boundingBox.right) / 2f
-                                                                        val centerY = (boundingBox.top + boundingBox.bottom) / 2f
-
-                                                                        val scaleX = screenWidthPx / previewSize.second.toFloat()
-                                                                        val scaleY = screenHeightPx / previewSize.first.toFloat()
-
-                                                                        DetectedBarcode(
-                                                                            value = value,
-                                                                            centerX = centerX * scaleX,
-                                                                            centerY = centerY * scaleY
-                                                                        )
-                                                                    } else null
-                                                                }
-                                                            }
-                                                            if (detected.isNotEmpty()) {
-                                                                detectedBarcodes = detected
-                                                                isPaused = true
-                                                            }
+                                                        }
+                                                        if (detected.isNotEmpty()) {
+                                                            detectedBarcodes = detected
+                                                            isPaused = true
                                                         }
                                                     }
                                                 }
+                                            } else if (scannedCode == null && !isPaused) {
+                                                consecutiveEmptyFrames++
+                                                if (consecutiveEmptyFrames > 45 && currentZoomRatio < 2.0f) {
+                                                    currentZoomRatio = (currentZoomRatio + 0.1f).coerceAtMost(2.0f)
+                                                    camera?.cameraControl?.setZoomRatio(currentZoomRatio)
+                                                    consecutiveEmptyFrames = 0
+                                                }
                                             }
-                                            .addOnCompleteListener {
-                                                imageProxy.close()
-                                            }
-                                    } else {
-                                        imageProxy.close()
-                                    }
+                                        }
+                                        .addOnCompleteListener {
+                                            imageProxy.close()
+                                        }
+                                } else {
+                                    imageProxy.close()
                                 }
                             }
-
-                        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-                        try {
-                            cameraProvider.unbindAll()
-                            camera = cameraProvider.bindToLifecycle(
-                                lifecycleOwner,
-                                cameraSelector,
-                                preview,
-                                capture,
-                                imageAnalyzer
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
                         }
-                    }, ContextCompat.getMainExecutor(context))
+
+                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+                    try {
+                        cameraProvider.unbindAll()
+                        camera = cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            cameraSelector,
+                            preview,
+                            capture,
+                            imageAnalyzer
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
+
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                val factory = previewView.meteringPointFactory
+                                val point = factory.createPoint(offset.x, offset.y)
+                                val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
+                                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
+                                    .build()
+                                camera?.cameraControl?.startFocusAndMetering(action)
+                            }
+                        }
+                )
 
                 ScanOverlay(
                     scanBoxSize = 280.dp,

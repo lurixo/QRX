@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "QRX"
 include(":app")
+include(":baselineprofile")
