@@ -1,20 +1,20 @@
 [versions]
 agp = "9.0.0"
-kotlin = "2.3.0"
-ksp = "2.3.4"
+kotlin = "2.3.10"
+ksp = "2.3.5"
 coreKtx = "1.17.0"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.2"
-composeBom = "2026.01.00"
-mlkitBarcodeScanning = "17.3.0"
+activityCompose = "1.12.3"
+composeBom = "2026.01.01"
+mlkitBarcodeScanning = "18.3.1"
 coil = "3.3.0"
-coroutines = "1.10.1"
+coroutines = "1.10.2"
 room = "2.8.4"
-navigation = "2.9.6"
-gson = "2.11.0"
-cameraX = "1.5.2"
+navigation = "2.9.7"
+gson = "2.13.2"
+cameraX = "1.5.3"
 accompanist = "0.37.3"
-qrxBarcode = "v1.0.1"
+qrxBarcode = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,7 +40,7 @@ camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.r
 camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
-qrx-barcode = { group = "com.github.lurixo", name = "qrx-barcode", version.ref = "qrxBarcode" }
+qrx-barcode = { group = "com.github.lurixo", name = "QRX-Barcode", version.ref = "qrxBarcode" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
