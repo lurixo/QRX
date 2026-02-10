@@ -118,6 +118,7 @@ val barcodeFormatNameIds = mapOf(
     BarcodeFormat.CODABAR to R.string.format_codabar
 )
 
+@Suppress("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BarcodeGenerateScreen(
@@ -567,11 +568,11 @@ fun BarcodeItemCard(
     onGenerate: () -> Unit,
     onDelete: () -> Unit,
     onSave: () -> Unit,
+    modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
-    onLongPress: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onLongPress: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }

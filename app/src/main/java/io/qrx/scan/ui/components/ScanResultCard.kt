@@ -2,8 +2,8 @@ package io.qrx.scan.ui.components
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Patterns
+import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -95,9 +95,9 @@ private fun isUrl(text: String): Boolean {
 
 private fun openUrl(context: Context, url: String, errorMsg: String, onError: ((String, Boolean) -> Unit)? = null) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(
+        val intent = Intent(Intent.ACTION_VIEW, (
             if (url.startsWith("http://") || url.startsWith("https://")) url else "https://$url"
-        ))
+        ).toUri())
         context.startActivity(intent)
     } catch (e: Exception) {
         onError?.invoke(errorMsg, false)
@@ -111,12 +111,12 @@ fun ScanResultCard(
     clipboardManager: ClipboardManager,
     context: Context,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
     onLongPress: () -> Unit = {},
-    onShowSnackbar: ((String, Boolean) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onShowSnackbar: ((String, Boolean) -> Unit)? = null
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected)
@@ -371,12 +371,12 @@ fun HistoryCard(
     clipboardManager: ClipboardManager,
     context: Context,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
     onLongPress: () -> Unit = {},
-    onShowSnackbar: ((String, Boolean) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onShowSnackbar: ((String, Boolean) -> Unit)? = null
 ) {
     val resultCountText = stringResource(R.string.result_count, codes.size)
     
@@ -427,7 +427,7 @@ fun HistoryCard(
                     val imageModel = if (imageUri.startsWith("/")) {
                         java.io.File(imageUri)
                     } else {
-                        try { Uri.parse(imageUri) } catch (e: Exception) { null }
+                        try { imageUri.toUri() } catch (e: Exception) { null }
                     }
                     if (imageModel != null) {
                         AsyncImage(

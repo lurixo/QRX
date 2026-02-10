@@ -14,7 +14,6 @@
     <string name="add">添加</string>
     <string name="select_all">全选</string>
     <string name="selected_count">已选择 %d 项</string>
-    <string name="image">图片</string>
     <string name="back">返回</string>
     <string name="clear">清空</string>
     <string name="generate">生成</string>
@@ -48,7 +47,6 @@
     <string name="error_correction_high">High（高纠错，容量小）</string>
     <string name="error_correction_low">Low（低纠错，容量大）</string>
     <string name="history">历史记录</string>
-    <string name="no_history">暂无历史记录</string>
     <string name="no_history_for_type">暂无%s记录</string>
     <string name="record_count">%d 条记录</string>
     <string name="format_code128">CODE-128 (通用)</string>
@@ -71,8 +69,8 @@
     <string name="error_itf_digits">ITF 只能包含数字</string>
     <string name="error_itf_min_length">ITF 至少需要 2 位数字</string>
     <string name="error_itf_even">ITF 需要偶数位数字</string>
-    <string name="error_code39_chars">CODE-39 只支持大写字母、数字和 -. $/+%</string>
-    <string name="error_code93_chars">CODE-93 只支持大写字母、数字和 -. $/+%</string>
+    <string name="error_code39_chars" formatted="false">CODE-39 只支持大写字母、数字和 -. $/+%</string>
+    <string name="error_code93_chars" formatted="false">CODE-93 只支持大写字母、数字和 -. $/+%</string>
     <string name="error_code128_ascii">CODE-128 只支持 ASCII 字符</string>
     <string name="error_codabar_chars">CODABAR 只支持数字和 -$:/.+ 及起止符 A-D</string>
     <string name="error_check_digit">校验位错误</string>

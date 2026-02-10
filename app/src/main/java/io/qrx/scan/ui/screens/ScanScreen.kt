@@ -112,6 +112,7 @@ fun copyImageToInternal(context: Context, uri: Uri): String? {
     }
 }
 
+@Suppress("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(

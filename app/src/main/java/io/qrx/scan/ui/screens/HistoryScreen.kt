@@ -353,6 +353,7 @@ fun CategoryListItem(
     }
 }
 
+@Suppress("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanHistoryListScreen(
@@ -369,7 +370,7 @@ fun ScanHistoryListScreen(
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
 
-    val title = context.getString(if (source == ScanSource.CAMERA) R.string.camera_scan else R.string.image_scan)
+    val title = stringResource(if (source == ScanSource.CAMERA) R.string.camera_scan else R.string.image_scan)
 
     BackHandler {
         if (isSelectionMode) { isSelectionMode = false; selectedIds = emptySet() }
@@ -543,6 +544,7 @@ fun ScanHistoryListScreen(
     }
 }
 
+@Suppress("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenerateHistoryListScreen(
@@ -558,7 +560,7 @@ fun GenerateHistoryListScreen(
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
 
-    val title = if (type == GenerateType.QR_CODE) context.getString(R.string.qrcode_generate) else context.getString(R.string.barcode_generate)
+    val title = if (type == GenerateType.QR_CODE) stringResource(R.string.qrcode_generate) else stringResource(R.string.barcode_generate)
 
     BackHandler {
         if (isSelectionMode) { isSelectionMode = false; selectedIds = emptySet() }
@@ -877,11 +879,11 @@ fun GenerateHistoryCard(
     context: android.content.Context,
     onDelete: () -> Unit,
     onSave: () -> Unit,
+    modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
-    onLongPress: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onLongPress: () -> Unit = {}
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)

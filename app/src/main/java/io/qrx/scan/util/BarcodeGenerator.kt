@@ -3,6 +3,7 @@ package io.qrx.scan.util
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import androidx.core.graphics.createBitmap
 import io.qrx.barcode.QrCodeGenerator
 import io.qrx.barcode.BarcodeGenerator as QrxBarcodeGenerator
 import io.qrx.barcode.BarcodeType
@@ -142,7 +143,7 @@ object BarcodeGenerator {
     private fun addPaddingToBitmap(source: Bitmap, padding: Int): Bitmap {
         val newWidth = source.width + padding * 2
         val newHeight = source.height + padding * 2
-        val result = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val result = createBitmap(newWidth, newHeight)
         val canvas = Canvas(result)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(source, padding.toFloat(), padding.toFloat(), null)

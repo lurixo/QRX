@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">QRX</string>
     <string name="tile_scan_label">Scan</string>
     <string name="tile_scan_description">QRX Scan</string>
@@ -13,8 +13,7 @@
     <string name="open">Open</string>
     <string name="add">Add</string>
     <string name="select_all">Select All</string>
-    <string name="selected_count">%d selected</string>
-    <string name="image">Image</string>
+    <string name="selected_count" tools:ignore="PluralsCandidate">%d selected</string>
     <string name="back">Back</string>
     <string name="clear">Clear</string>
     <string name="generate">Generate</string>
@@ -23,15 +22,15 @@
     <string name="scan_or_generate">Scan or Generate</string>
     <string name="scan_batch_support">Batch scan and generate QR codes/barcodes</string>
     <string name="scan_hint">Place barcode/QR code within frame</string>
-    <string name="scan_detected_codes">%d codes detected, tap to select</string>
+    <string name="scan_detected_codes" tools:ignore="PluralsCandidate">%d codes detected, tap to select</string>
     <string name="scan_history">Scan History</string>
     <string name="image_scan">Image Scan</string>
     <string name="select_image">Select Image</string>
     <string name="select_this_code">Select this code</string>
     <string name="images_already_selected">Images already in list</string>
     <string name="no_barcode_found">No barcode/QR code found</string>
-    <string name="result_count">%d results</string>
-    <string name="recognized_results">%d results found</string>
+    <string name="result_count" tools:ignore="PluralsCandidate">%d results</string>
+    <string name="recognized_results" tools:ignore="PluralsCandidate">%d results found</string>
     <string name="recognizing">Recognizing…</string>
     <string name="recognize_failed">Recognition failed</string>
     <string name="continue_scan">Continue Scan</string>
@@ -48,9 +47,8 @@
     <string name="error_correction_high">High (more reliable, less capacity)</string>
     <string name="error_correction_low">Low (less reliable, more capacity)</string>
     <string name="history">History</string>
-    <string name="no_history">No history</string>
     <string name="no_history_for_type">No %s history</string>
-    <string name="record_count">%d records</string>
+    <string name="record_count" tools:ignore="PluralsCandidate">%d records</string>
     <string name="format_code128">CODE-128 (General)</string>
     <string name="format_code39">CODE-39 (Alphanumeric)</string>
     <string name="format_code93">CODE-93</string>
@@ -71,10 +69,10 @@
     <string name="error_itf_digits">ITF requires digits only</string>
     <string name="error_itf_min_length">ITF requires at least 2 digits</string>
     <string name="error_itf_even">ITF requires even number of digits</string>
-    <string name="error_code39_chars">CODE-39: A-Z, 0-9, -. $/+% only</string>
-    <string name="error_code93_chars">CODE-93: A-Z, 0-9, -. $/+% only</string>
+    <string name="error_code39_chars" tools:ignore="TypographyDashes" formatted="false">CODE-39: A-Z, 0-9, -. $/+% only</string>
+    <string name="error_code93_chars" tools:ignore="TypographyDashes" formatted="false">CODE-93: A-Z, 0-9, -. $/+% only</string>
     <string name="error_code128_ascii">CODE-128: ASCII characters only</string>
-    <string name="error_codabar_chars">CODABAR: 0-9, -$:/.+ and A-D only</string>
+    <string name="error_codabar_chars" tools:ignore="TypographyDashes">CODABAR: 0-9, -$:/.+ and A-D only</string>
     <string name="error_check_digit">Invalid check digit</string>
     <string name="error_empty_content">Please enter content</string>
     <string name="error_generate_failed">Generation failed</string>
@@ -83,14 +81,14 @@
     <string name="hint_7_or_8_digits">7 or 8 digits</string>
     <string name="hint_11_or_12_digits">11 or 12 digits</string>
     <string name="hint_even_digits">Even number of digits</string>
-    <string name="hint_alphanumeric">A-Z, 0-9, -. $/+%</string>
-    <string name="hint_codabar_chars">0-9, -$:/.+, A-D</string>
+    <string name="hint_alphanumeric" tools:ignore="TypographyDashes">A-Z, 0-9, -. $/+%</string>
+    <string name="hint_codabar_chars" tools:ignore="TypographyDashes">0-9, -$:/.+, A-D</string>
     <string name="copied">Copied</string>
-    <string name="copied_results">Copied %d results</string>
+    <string name="copied_results" tools:ignore="PluralsCandidate">Copied %d results</string>
     <string name="saved_to_gallery">Saved to gallery</string>
     <string name="saved_qrcodes_to_gallery">Saved %d QR codes to gallery</string>
-    <string name="saved_barcodes_to_gallery">Saved %d barcodes to gallery</string>
-    <string name="saved_items_to_gallery">Saved %d items to gallery</string>
+    <string name="saved_barcodes_to_gallery" tools:ignore="PluralsCandidate">Saved %d barcodes to gallery</string>
+    <string name="saved_items_to_gallery" tools:ignore="PluralsCandidate">Saved %d items to gallery</string>
     <string name="save_failed">Save failed</string>
     <string name="no_qrcode_to_save">No QR code to save</string>
     <string name="no_barcode_to_save">No barcode to save</string>

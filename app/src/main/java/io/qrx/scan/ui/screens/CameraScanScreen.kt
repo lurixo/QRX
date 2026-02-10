@@ -6,7 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.activity.compose.BackHandler
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -87,7 +87,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -132,8 +132,7 @@ fun CameraScanScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val database = (context.applicationContext as QRXApplication).database
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
     val scope = rememberCoroutineScope()
     
     val strBack = stringResource(R.string.back)
@@ -153,8 +152,8 @@ fun CameraScanScreen(
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val screenWidthPx = windowInfo.containerSize.width.toFloat()
+    val screenHeightPx = windowInfo.containerSize.height.toFloat()
 
     LaunchedEffect(Unit) {
         if (!cameraPermissionState.status.isGranted) {
@@ -739,7 +738,7 @@ fun ScanResultBottomCard(
                             try {
                                 val url = if (code.startsWith("http://") || code.startsWith("https://"))
                                     code else "https://$code"
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
                             } catch (e: Exception) {
                                 onShowSnackbar(strCannotOpenLink, false)
                             }

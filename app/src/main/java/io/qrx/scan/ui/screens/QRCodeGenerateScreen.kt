@@ -110,6 +110,7 @@ data class QRCodeItem(
     val historyId: Long? = null
 )
 
+@Suppress("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QRCodeGenerateScreen(
@@ -553,11 +554,11 @@ fun QRCodeItemCard(
     onGenerate: () -> Unit,
     onDelete: () -> Unit,
     onSave: () -> Unit,
+    modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
-    onLongPress: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onLongPress: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
