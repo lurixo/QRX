@@ -339,7 +339,7 @@ fun CameraScanScreen(
                                     barcodeScanner.process(image)
                                         .addOnSuccessListener { barcodes ->
                                             if (barcodes.isNotEmpty() && scannedCode == null && !isPaused) {
-                                                val decodedBarcodes = barcodes.filter { it.rawValue != null }
+                                                val decodedBarcodes = barcodes.filter { !it.rawValue.isNullOrEmpty() }
 
                                                 if (decodedBarcodes.isNotEmpty()) {
                                                     consecutiveEmptyFrames = 0
