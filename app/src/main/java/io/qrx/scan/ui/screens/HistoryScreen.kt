@@ -62,7 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -90,53 +89,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
-sealed class HistoryNavState {
-    data object Main : HistoryNavState()
-    data class ScanCategory(val source: ScanSource) : HistoryNavState()
-    data class GenerateCategory(val type: GenerateType) : HistoryNavState()
-}
-
-@Composable
-fun HistoryScreen(
-    onNavigateBack: () -> Unit
-) {
-    var navState by remember { mutableStateOf<HistoryNavState>(HistoryNavState.Main) }
-
-    AnimatedContent(
-        targetState = navState,
-        transitionSpec = {
-            if (targetState is HistoryNavState.Main) {
-                MD3Transitions.sharedAxisX(forward = false)
-            } else {
-                MD3Transitions.sharedAxisX(forward = true)
-            }
-        },
-        label = "historyNavTransition"
-    ) { state ->
-        when (state) {
-            is HistoryNavState.Main -> {
-                HistoryMainScreen(
-                    onNavigateBack = onNavigateBack,
-                    onSelectScanSource = { navState = HistoryNavState.ScanCategory(it) },
-                    onSelectGenerateType = { navState = HistoryNavState.GenerateCategory(it) }
-                )
-            }
-            is HistoryNavState.ScanCategory -> {
-                ScanHistoryListScreen(
-                    source = state.source,
-                    onNavigateBack = { navState = HistoryNavState.Main }
-                )
-            }
-            is HistoryNavState.GenerateCategory -> {
-                GenerateHistoryListScreen(
-                    type = state.type,
-                    onNavigateBack = { navState = HistoryNavState.Main }
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -364,9 +316,9 @@ fun ScanHistoryListScreen(
 
     val title = stringResource(if (source == ScanSource.CAMERA) R.string.camera_scan else R.string.image_scan)
 
-    BackHandler {
-        if (isSelectionMode) { isSelectionMode = false; selectedIds = emptySet() }
-        else onNavigateBack()
+    BackHandler(enabled = isSelectionMode) {
+        isSelectionMode = false
+        selectedIds = emptySet()
     }
 
     fun exitSelectionMode() { isSelectionMode = false; selectedIds = emptySet() }
@@ -554,9 +506,9 @@ fun GenerateHistoryListScreen(
 
     val title = if (type == GenerateType.QR_CODE) stringResource(R.string.qrcode_generate) else stringResource(R.string.barcode_generate)
 
-    BackHandler {
-        if (isSelectionMode) { isSelectionMode = false; selectedIds = emptySet() }
-        else onNavigateBack()
+    BackHandler(enabled = isSelectionMode) {
+        isSelectionMode = false
+        selectedIds = emptySet()
     }
 
     fun exitSelectionMode() { isSelectionMode = false; selectedIds = emptySet() }
@@ -896,5 +848,3 @@ fun GenerateHistoryCard(
         }
     }
 }
-
-

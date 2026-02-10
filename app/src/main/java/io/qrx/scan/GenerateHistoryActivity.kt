@@ -1,6 +1,5 @@
 package io.qrx.scan
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,12 +12,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import io.qrx.scan.ui.screens.HistoryMainScreen
+import io.qrx.scan.data.GenerateType
+import io.qrx.scan.ui.screens.GenerateHistoryListScreen
 import io.qrx.scan.ui.theme.QRXTheme
 
-class HistoryActivity : ComponentActivity() {
+class GenerateHistoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val type = intent.getStringExtra(EXTRA_TYPE)
+            ?.let { runCatching { GenerateType.valueOf(it) }.getOrNull() }
+            ?: GenerateType.QR_CODE
 
         setContent {
             val isDark = isSystemInDarkTheme()
@@ -32,20 +36,9 @@ class HistoryActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HistoryMainScreen(
-                        onNavigateBack = { finish() },
-                        onSelectScanSource = { source ->
-                            startActivity(
-                                Intent(this@HistoryActivity, ScanHistoryActivity::class.java)
-                                    .putExtra(ScanHistoryActivity.EXTRA_SOURCE, source.name)
-                            )
-                        },
-                        onSelectGenerateType = { type ->
-                            startActivity(
-                                Intent(this@HistoryActivity, GenerateHistoryActivity::class.java)
-                                    .putExtra(GenerateHistoryActivity.EXTRA_TYPE, type.name)
-                            )
-                        }
+                    GenerateHistoryListScreen(
+                        type = type,
+                        onNavigateBack = { finish() }
                     )
                 }
             }
@@ -72,5 +65,9 @@ class HistoryActivity : ComponentActivity() {
                 navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
             )
         }
+    }
+
+    companion object {
+        const val EXTRA_TYPE = "extra_type"
     }
 }

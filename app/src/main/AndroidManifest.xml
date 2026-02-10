@@ -38,6 +38,16 @@
             android:theme="@style/Theme.QRX" />
 
         <activity
+            android:name=".ScanHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QRX" />
+
+        <activity
+            android:name=".GenerateHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.QRX" />
+
+        <activity
             android:name=".QRCodeGenerateActivity"
             android:exported="false"
             android:theme="@style/Theme.QRX" />
