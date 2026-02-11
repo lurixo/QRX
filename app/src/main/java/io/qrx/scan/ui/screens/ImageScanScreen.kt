@@ -341,12 +341,11 @@ fun ImageScanScreen(
                     MD3PressableSurface(
                         onClick = { copyAll() },
                         shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow
+                        color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shadowElevation = 2.dp
                         ) {
                             Row(
@@ -356,12 +355,12 @@ fun ImageScanScreen(
                                 Icon(
                                     Icons.Outlined.ContentCopy,
                                     null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stringResource(R.string.copy_all),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                         }

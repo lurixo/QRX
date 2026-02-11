@@ -81,6 +81,7 @@ import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3StateAnimations
+import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
@@ -492,11 +493,43 @@ fun BarcodeGenerateScreen(
                         enter = MD3FabAnimations.enter(),
                         exit = MD3FabAnimations.exit()
                     ) {
-                        Surface(
+                        MD3PressableSurface(
                             onClick = { saveAllToGallery() },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Save,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.save_all),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    MD3PressableSurface(
+                        onClick = { addNewItem() },
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             shadowElevation = 2.dp
                         ) {
                             Row(
@@ -504,40 +537,16 @@ fun BarcodeGenerateScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    Icons.Default.Save,
+                                    Icons.Outlined.AddCircle,
                                     null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    stringResource(R.string.save_all),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    stringResource(R.string.add),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
-                        }
-                    }
-
-                    Surface(
-                        onClick = { addNewItem() },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        tonalElevation = 2.dp,
-                        shadowElevation = 2.dp
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Outlined.AddCircle,
-                                null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.add),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
                         }
                     }
                 }
