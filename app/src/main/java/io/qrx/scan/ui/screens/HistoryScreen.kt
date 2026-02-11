@@ -1092,7 +1092,7 @@ fun GenerateHistoryCard(
                     }
                 }
 
-                Box(modifier = Modifier.width(32.dp)) {
+                Box(modifier = Modifier.size(width = 32.dp, height = 96.dp)) {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
                         enter = scaleIn(
