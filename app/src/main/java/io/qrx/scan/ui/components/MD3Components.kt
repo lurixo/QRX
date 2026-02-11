@@ -3,6 +3,7 @@ package io.qrx.scan.ui.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.keyframes
@@ -12,6 +13,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,8 +34,7 @@ import androidx.compose.foundation.relocation.BringIntoViewResponder
 import androidx.compose.foundation.relocation.bringIntoViewResponder
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -354,17 +356,39 @@ fun MD3SelectionIcon(
         label = "selectionScale"
     )
 
-    Crossfade(
-        targetState = selected,
+    val backgroundColor by animateColorAsState(
+        targetValue = if (selected) selectedTint else MaterialTheme.colorScheme.surfaceContainerHighest,
         animationSpec = MD3Motion.standardSpec(),
-        label = "selectionCrossfade"
-    ) { isSelected ->
-        Icon(
-            imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-            contentDescription = null,
-            modifier = modifier.scale(scale),
-            tint = if (isSelected) selectedTint else unselectedTint
-        )
+        label = "selectionBg"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) selectedTint else unselectedTint,
+        animationSpec = MD3Motion.standardSpec(),
+        label = "selectionBorder"
+    )
+
+    Box(
+        modifier = modifier
+            .scale(scale)
+            .background(backgroundColor, RoundedCornerShape(6.dp))
+            .border(1.5.dp, borderColor, RoundedCornerShape(6.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Crossfade(
+            targetState = selected,
+            animationSpec = MD3Motion.standardSpec(),
+            label = "selectionCrossfade"
+        ) { isSelected ->
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
     }
 }
 

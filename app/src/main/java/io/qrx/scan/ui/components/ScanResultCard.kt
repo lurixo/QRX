@@ -5,12 +5,18 @@ import android.content.Intent
 import android.util.Patterns
 import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -113,24 +119,17 @@ fun ScanResultCard(
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
-                if (isSelectionMode) {
-                    MD3SelectionIcon(
-                        selected = isSelected,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
-                AsyncImage(
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
                     model = result.savedPath ?: result.uri,
                     contentDescription = null,
                     modifier = Modifier
@@ -210,7 +209,11 @@ fun ScanResultCard(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                if (!isSelectionMode) {
+                AnimatedVisibility(
+                    visible = !isSelectionMode,
+                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                ) {
                     IconButton(
                         onClick = onDelete,
                         modifier = Modifier.size(32.dp)
@@ -241,6 +244,27 @@ fun ScanResultCard(
                         )
                     }
                 }
+            }
+            }
+
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                modifier = Modifier.align(Alignment.TopStart),
+                enter = scaleIn(
+                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                    initialScale = 0.6f
+                ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                exit = scaleOut(
+                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                    targetScale = 0.6f
+                ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+            ) {
+                MD3SelectionIcon(
+                    selected = isSelected,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(22.dp)
+                )
             }
         }
     }
@@ -372,24 +396,17 @@ fun HistoryCard(
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
-                if (isSelectionMode) {
-                    MD3SelectionIcon(
-                        selected = isSelected,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
-                if (!imageUri.isNullOrEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!imageUri.isNullOrEmpty()) {
                     val imageModel = if (imageUri.startsWith("/")) {
                         java.io.File(imageUri)
                     } else {
@@ -421,7 +438,11 @@ fun HistoryCard(
                     )
                 }
 
-                if (!isSelectionMode) {
+                AnimatedVisibility(
+                    visible = !isSelectionMode,
+                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                ) {
                     IconButton(
                         onClick = onDelete,
                         modifier = Modifier.size(32.dp)
@@ -453,7 +474,26 @@ fun HistoryCard(
                 }
             }
         }
+
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                modifier = Modifier.align(Alignment.TopStart),
+                enter = scaleIn(
+                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                    initialScale = 0.6f
+                ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                exit = scaleOut(
+                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                    targetScale = 0.6f
+                ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+            ) {
+                MD3SelectionIcon(
+                    selected = isSelected,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(22.dp)
+                )
+            }
+        }
     }
 }
-
-

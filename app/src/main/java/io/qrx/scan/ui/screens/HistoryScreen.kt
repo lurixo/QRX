@@ -5,6 +5,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -788,17 +792,10 @@ fun GenerateHistoryCard(
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (isSelectionMode) {
-                    MD3SelectionIcon(
-                        selected = isSelected,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
-                val imageFile = File(history.imagePath)
+        Box {
+            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    val imageFile = File(history.imagePath)
                 if (imageFile.exists()) {
                     AsyncImage(
                         model = imageFile,
@@ -836,7 +833,11 @@ fun GenerateHistoryCard(
                     }
                 }
 
-                if (!isSelectionMode) {
+                AnimatedVisibility(
+                    visible = !isSelectionMode,
+                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                ) {
                     Column {
                         IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
                             Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
@@ -846,6 +847,27 @@ fun GenerateHistoryCard(
                         }
                     }
                 }
+            }
+        }
+
+            AnimatedVisibility(
+                visible = isSelectionMode,
+                modifier = Modifier.align(Alignment.TopStart),
+                enter = scaleIn(
+                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                    initialScale = 0.6f
+                ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                exit = scaleOut(
+                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                    targetScale = 0.6f
+                ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+            ) {
+                MD3SelectionIcon(
+                    selected = isSelected,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(22.dp)
+                )
             }
         }
     }

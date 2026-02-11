@@ -3,6 +3,13 @@ package io.qrx.scan.ui.screens
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -560,6 +567,15 @@ fun QRCodeItemCard(
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
 
+    val containerColor by animateColorAsState(
+        targetValue = if (isSelected)
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.primaryContainer, 0.15f)
+        else
+            MaterialTheme.colorScheme.surfaceContainerLow,
+        animationSpec = MD3Motion.standardSpec(),
+        label = "qrCardColor"
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -569,40 +585,35 @@ fun QRCodeItemCard(
                 onClick = { if (isSelectionMode && item.bitmap != null) onToggleSelect() },
                 onLongClick = onLongPress
             ),
-        color = if (isSelected)
-            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.primaryContainer, 0.15f)
-        else
-            MaterialTheme.colorScheme.surfaceContainerLow,
+        color = containerColor,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
         shadowElevation = 2.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isSelectionMode && item.bitmap != null) {
-                        MD3SelectionIcon(
-                            selected = isSelected,
-                            modifier = Modifier.size(24.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "#${index + 1}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                     }
-                    Text(
-                        text = "#${index + 1}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
 
-                if (showDelete) {
+                AnimatedVisibility(
+                    visible = showDelete,
+                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                ) {
                     IconButton(
                         onClick = onDelete,
                         modifier = Modifier.size(32.dp)
@@ -619,7 +630,16 @@ fun QRCodeItemCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (!isSelectionMode) {
+            AnimatedVisibility(
+                visible = !isSelectionMode,
+                enter = expandVertically(
+                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.MEDIUM1)
+                ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                exit = shrinkVertically(
+                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4)
+                ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+            ) {
+            Column {
                 Box {
                     Surface(
                         onClick = { expanded = true },
@@ -693,6 +713,7 @@ fun QRCodeItemCard(
                     )
                 )
             }
+            }
 
             AnimatedVisibility(
                 visible = item.bitmap != null,
@@ -755,6 +776,27 @@ fun QRCodeItemCard(
                         }
                     }
                 }
+            }
+        }
+
+            AnimatedVisibility(
+                visible = isSelectionMode && item.bitmap != null,
+                modifier = Modifier.align(Alignment.TopStart),
+                enter = scaleIn(
+                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                    initialScale = 0.6f
+                ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                exit = scaleOut(
+                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                    targetScale = 0.6f
+                ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+            ) {
+                MD3SelectionIcon(
+                    selected = isSelected,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(22.dp)
+                )
             }
         }
     }
