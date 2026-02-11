@@ -441,7 +441,7 @@ fun HistoryCard(
                 }
 
                 Box(modifier = Modifier.width(32.dp)) {
-                    AnimatedVisibility(
+                    androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
                         enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
                         exit = fadeOut(animationSpec = MD3Motion.standardSpec())
