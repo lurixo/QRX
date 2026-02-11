@@ -845,18 +845,18 @@ fun GenerateHistoryCard(
                         }
                     )
                     if (hasOverflow || isContentExpanded) {
-                        Box(
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                            horizontalArrangement = Arrangement.End
                         ) {
                             IconButton(
                                 onClick = onToggleContentExpand,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(32.dp)
                             ) {
                                 Icon(
                                     if (isContentExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                     contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier.size(20.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -871,17 +871,19 @@ fun GenerateHistoryCard(
                     }
                 }
 
-                AnimatedVisibility(
-                    visible = !isSelectionMode,
-                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
-                ) {
-                    Column {
-                        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                        }
-                        IconButton(onClick = onSave, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                Box(modifier = Modifier.width(32.dp)) {
+                    AnimatedVisibility(
+                        visible = !isSelectionMode,
+                        enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                        exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                    ) {
+                        Column {
+                            IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                            }
+                            IconButton(onClick = onSave, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                            }
                         }
                     }
                 }
