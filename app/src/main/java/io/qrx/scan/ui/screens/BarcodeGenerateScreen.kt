@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +61,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -749,7 +752,8 @@ fun BarcodeItemCard(
                                 Image(
                                     bitmap = bitmap.asImageBitmap(),
                                     contentDescription = stringResource(R.string.barcode),
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize().background(Color.White),
+                                    filterQuality = FilterQuality.None
                                 )
                             }
                         }

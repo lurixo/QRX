@@ -102,9 +102,6 @@ fun ScanResultCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = MD3Motion.emphasizedSpec()
-            )
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -364,9 +361,6 @@ fun HistoryCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = MD3Motion.emphasizedSpec()
-            )
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

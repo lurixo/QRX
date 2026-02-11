@@ -5,8 +5,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -60,6 +60,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -777,9 +779,6 @@ fun GenerateHistoryCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = MD3Motion.emphasizedSpec()
-            )
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -807,8 +806,10 @@ fun GenerateHistoryCard(
                         modifier = Modifier
                             .size(if (history.generateType == GenerateType.QR_CODE) 60.dp else 80.dp)
                             .height(if (history.generateType == GenerateType.QR_CODE) 60.dp else 40.dp)
+                            .background(Color.White, RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = if (history.generateType == GenerateType.QR_CODE) ContentScale.Fit else ContentScale.FillWidth
+                        contentScale = if (history.generateType == GenerateType.QR_CODE) ContentScale.Fit else ContentScale.FillWidth,
+                        filterQuality = FilterQuality.None
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
