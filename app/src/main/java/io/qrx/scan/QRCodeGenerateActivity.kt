@@ -18,6 +18,7 @@ import io.qrx.scan.ui.theme.QRXTheme
 class QRCodeGenerateActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         setContent {
             val isDark = isSystemInDarkTheme()

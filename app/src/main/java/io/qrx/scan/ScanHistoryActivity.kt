@@ -19,6 +19,7 @@ import io.qrx.scan.ui.theme.QRXTheme
 class ScanHistoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val source = intent.getStringExtra(EXTRA_SOURCE)
             ?.let { runCatching { ScanSource.valueOf(it) }.getOrNull() }

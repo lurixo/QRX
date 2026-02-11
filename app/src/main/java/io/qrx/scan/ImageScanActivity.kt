@@ -19,6 +19,7 @@ import io.qrx.scan.ui.theme.QRXTheme
 class ImageScanActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val uris = mutableListOf<Uri>()
         intent.clipData?.let { clip ->

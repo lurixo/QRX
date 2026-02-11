@@ -19,6 +19,7 @@ import io.qrx.scan.ui.theme.QRXTheme
 class GenerateHistoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val type = intent.getStringExtra(EXTRA_TYPE)
             ?.let { runCatching { GenerateType.valueOf(it) }.getOrNull() }
