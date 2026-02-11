@@ -11,7 +11,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,13 +18,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -54,6 +53,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,7 +75,6 @@ import io.qrx.scan.data.BarcodeFormat
 import io.qrx.scan.data.GenerateHistoryEntity
 import io.qrx.scan.data.GenerateType
 import io.qrx.scan.ui.animation.MD3FabAnimations
-import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3StateAnimations
 import io.qrx.scan.ui.components.MD3PressableSurface
@@ -121,7 +120,7 @@ fun BarcodeGenerateScreen(
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val database = (context.applicationContext as QRXApplication).database
-    val listState = rememberLazyListState()
+    val scrollState = rememberScrollState()
 
     val items = remember { mutableStateListOf(BarcodeItem()) }
     var isSaving by remember { mutableStateOf(false) }
@@ -138,7 +137,7 @@ fun BarcodeGenerateScreen(
     fun addNewItem() {
         items.add(BarcodeItem())
         scope.launch {
-            listState.animateScrollToItem(items.size - 1)
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
@@ -423,49 +422,48 @@ fun BarcodeGenerateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding()
         ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = 160.dp
-                ),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 160.dp
+                    ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                    itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
-                    BarcodeItemCard(
-                        item = item,
-                        index = index,
-                        showDelete = !isSelectionMode,
-                        onContentChange = { updateContent(index, it) },
-                        onFormatChange = { updateFormat(index, it) },
-                        onGenerate = { generateBarcode(index) },
-                        onDelete = { removeItem(index) },
-                        onSave = { saveSingleItem(item) },
-                        isSelectionMode = isSelectionMode,
-                        isSelected = item.id in selectedIds,
-                        onToggleSelect = {
-                            selectedIds = if (item.id in selectedIds) {
-                                selectedIds - item.id
-                            } else {
-                                selectedIds + item.id
+                items.forEachIndexed { index, item ->
+                    key(item.id) {
+                        BarcodeItemCard(
+                            item = item,
+                            index = index,
+                            showDelete = !isSelectionMode,
+                            onContentChange = { updateContent(index, it) },
+                            onFormatChange = { updateFormat(index, it) },
+                            onGenerate = { generateBarcode(index) },
+                            onDelete = { removeItem(index) },
+                            onSave = { saveSingleItem(item) },
+                            isSelectionMode = isSelectionMode,
+                            isSelected = item.id in selectedIds,
+                            onToggleSelect = {
+                                selectedIds = if (item.id in selectedIds) {
+                                    selectedIds - item.id
+                                } else {
+                                    selectedIds + item.id
+                                }
+                            },
+                            onLongPress = {
+                                if (!isSelectionMode && item.bitmap != null) {
+                                    isSelectionMode = true
+                                    selectedIds = setOf(item.id)
+                                }
                             }
-                        },
-                        onLongPress = {
-                            if (!isSelectionMode && item.bitmap != null) {
-                                isSelectionMode = true
-                                selectedIds = setOf(item.id)
-                            }
-                        },
-                        modifier = Modifier.animateItem(
-                            fadeInSpec = MD3ListAnimations.fadeInSpec(index),
-                            fadeOutSpec = MD3ListAnimations.fadeOutSpec(),
-                            placementSpec = MD3ListAnimations.placementSpec()
                         )
-                    )
+                    }
                 }
             }
 
