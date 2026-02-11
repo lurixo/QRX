@@ -53,7 +53,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -119,17 +117,10 @@ fun QRCodeGenerateScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    var focusedItemIndex by remember { mutableStateOf(-1) }
     val density = LocalDensity.current
     val imeBottomPx = WindowInsets.ime.getBottom(density)
     val isKeyboardVisible = imeBottomPx > 0
     val imeBottomDp = with(density) { imeBottomPx.toDp() }
-
-    LaunchedEffect(isKeyboardVisible, focusedItemIndex) {
-        if (isKeyboardVisible && focusedItemIndex >= 0 && focusedItemIndex < items.size) {
-            listState.animateScrollToItem(focusedItemIndex)
-        }
-    }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -461,7 +452,6 @@ fun QRCodeGenerateScreen(
                                     selectedIds = setOf(item.id)
                                 }
                             },
-                            onFocused = { focusedItemIndex = index },
                             modifier = Modifier.animateItem(
                                 fadeInSpec = MD3ListAnimations.fadeInSpec(index),
                                 fadeOutSpec = MD3ListAnimations.fadeOutSpec(),
@@ -573,8 +563,7 @@ fun QRCodeItemCard(
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
-    onLongPress: () -> Unit = {},
-    onFocused: () -> Unit = {}
+    onLongPress: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
@@ -703,8 +692,7 @@ fun QRCodeItemCard(
                     value = item.content,
                     onValueChange = onContentChange,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { if (it.isFocused) onFocused() },
+                        .fillMaxWidth(),
                     label = { Text(stringResource(R.string.input_content)) },
                     placeholder = { Text(stringResource(R.string.text_url_contact)) },
                     singleLine = false,
