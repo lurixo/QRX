@@ -5,11 +5,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,6 +68,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
@@ -508,34 +510,6 @@ fun ScanHistoryListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         MD3PressableSurface(
-                            onClick = { saveAllToGallery() },
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                tonalElevation = 2.dp,
-                                shadowElevation = 2.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Default.Save,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        stringResource(R.string.save_all),
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        }
-                        MD3PressableSurface(
                             onClick = {
                                 val allCodes = historyList.flatMap { it.codes }.distinct()
                                 clipboardManager.setText(AnnotatedString(allCodes.joinToString("\n")))
@@ -562,6 +536,34 @@ fun ScanHistoryListScreen(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         stringResource(R.string.copy_all),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        MD3PressableSurface(
+                            onClick = { saveAllToGallery() },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Save,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.save_all),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
@@ -615,6 +617,10 @@ fun ScanHistoryListScreen(
                                     }
                                 },
                                 onSave = { saveSingleItem(history.imageUri) },
+                                onCopy = {
+                                    clipboardManager.setText(AnnotatedString(history.codes.joinToString("\n")))
+                                    snackbarData = SnackbarData(context.getString(R.string.copied_results, history.codes.size), true)
+                                },
                                 isSelectionMode = isSelectionMode,
                                 isSelected = history.id in selectedIds,
                                 onToggleSelect = { selectedIds = if (history.id in selectedIds) selectedIds - history.id else selectedIds + history.id },
@@ -1005,6 +1011,11 @@ fun GenerateHistoryCard(
 
     var hasOverflow by remember { mutableStateOf(false) }
 
+    val deleteScale = remember { Animatable(1f) }
+    val copyScale = remember { Animatable(1f) }
+    val saveScale = remember { Animatable(1f) }
+    val pulseScope = rememberCoroutineScope()
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -1018,7 +1029,7 @@ fun GenerateHistoryCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Box {
-            Column(modifier = Modifier.fillMaxWidth().padding(12.dp).animateContentSize(animationSpec = MD3Motion.emphasizedSpec())) {
+            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val imageFile = File(history.imagePath)
                 if (imageFile.exists()) {
@@ -1084,17 +1095,50 @@ fun GenerateHistoryCard(
                 Box(modifier = Modifier.width(32.dp)) {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
-                        enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                        exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                        enter = scaleIn(
+                            animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                            initialScale = 0.6f
+                        ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                        exit = scaleOut(
+                            animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                            targetScale = 0.6f
+                        ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                     ) {
                         Column {
-                            IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                            IconButton(
+                                onClick = {
+                                    pulseScope.launch {
+                                        deleteScale.animateTo(0.75f, tween(50))
+                                        deleteScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onDelete()
+                                },
+                                modifier = Modifier.size(32.dp).scale(deleteScale.value)
+                            ) {
                                 Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
-                            IconButton(onClick = onCopy, modifier = Modifier.size(32.dp)) {
+                            IconButton(
+                                onClick = {
+                                    pulseScope.launch {
+                                        copyScale.animateTo(0.75f, tween(50))
+                                        copyScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onCopy()
+                                },
+                                modifier = Modifier.size(32.dp).scale(copyScale.value)
+                            ) {
                                 Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
-                            IconButton(onClick = onSave, modifier = Modifier.size(32.dp)) {
+                            IconButton(
+                                onClick = {
+                                    pulseScope.launch {
+                                        saveScale.animateTo(0.75f, tween(50))
+                                        saveScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onSave()
+                                },
+                                modifier = Modifier.size(32.dp).scale(saveScale.value)
+                            ) {
                                 Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                         }

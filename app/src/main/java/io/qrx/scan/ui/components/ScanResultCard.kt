@@ -12,6 +12,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -47,10 +49,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
@@ -65,6 +69,7 @@ import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.screens.ScanResult
 import io.qrx.scan.util.formatTimestamp
+import kotlinx.coroutines.launch
 
 private fun isUrl(text: String): Boolean {
     return Patterns.WEB_URL.matcher(text).matches() ||
@@ -366,6 +371,7 @@ fun HistoryCard(
     context: Context,
     onDelete: () -> Unit,
     onSave: () -> Unit = {},
+    onCopy: () -> Unit = {},
     modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -383,6 +389,11 @@ fun HistoryCard(
         animationSpec = MD3Motion.standardSpec(),
         label = "historyCardColor"
     )
+
+    val deleteScale = remember { Animatable(1f) }
+    val copyScale = remember { Animatable(1f) }
+    val saveScale = remember { Animatable(1f) }
+    val pulseScope = rememberCoroutineScope()
 
     Card(
         modifier = modifier
@@ -443,13 +454,25 @@ fun HistoryCard(
                 Box(modifier = Modifier.width(32.dp)) {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
-                        enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                        exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                        enter = scaleIn(
+                            animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                            initialScale = 0.6f
+                        ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                        exit = scaleOut(
+                            animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                            targetScale = 0.6f
+                        ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                     ) {
                         Column {
                             IconButton(
-                                onClick = onDelete,
-                                modifier = Modifier.size(32.dp)
+                                onClick = {
+                                    pulseScope.launch {
+                                        deleteScale.animateTo(0.75f, tween(50))
+                                        deleteScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onDelete()
+                                },
+                                modifier = Modifier.size(32.dp).scale(deleteScale.value)
                             ) {
                                 Icon(
                                     Icons.Default.Close,
@@ -459,8 +482,31 @@ fun HistoryCard(
                                 )
                             }
                             IconButton(
-                                onClick = onSave,
-                                modifier = Modifier.size(32.dp)
+                                onClick = {
+                                    pulseScope.launch {
+                                        copyScale.animateTo(0.75f, tween(50))
+                                        copyScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onCopy()
+                                },
+                                modifier = Modifier.size(32.dp).scale(copyScale.value)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.ContentCopy,
+                                    contentDescription = stringResource(R.string.copy),
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    pulseScope.launch {
+                                        saveScale.animateTo(0.75f, tween(50))
+                                        saveScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                    }
+                                    onSave()
+                                },
+                                modifier = Modifier.size(32.dp).scale(saveScale.value)
                             ) {
                                 Icon(
                                     Icons.Default.Save,
