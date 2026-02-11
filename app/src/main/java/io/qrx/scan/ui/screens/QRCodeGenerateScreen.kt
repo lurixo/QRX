@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -117,10 +118,7 @@ fun QRCodeGenerateScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    val density = LocalDensity.current
-    val imeBottomPx = WindowInsets.ime.getBottom(density)
-    val isKeyboardVisible = imeBottomPx > 0
-    val imeBottomDp = with(density) { imeBottomPx.toDp() }
+    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -408,14 +406,8 @@ fun QRCodeGenerateScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .imePadding()
             ) {
-                val bottomPadding = if (isKeyboardVisible) {
-                    val scaffoldBottom = paddingValues.calculateBottomPadding()
-                    (imeBottomDp - scaffoldBottom).coerceAtLeast(0.dp) + 16.dp
-                } else {
-                    160.dp
-                }
-
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
@@ -423,7 +415,7 @@ fun QRCodeGenerateScreen(
                         start = 16.dp,
                         end = 16.dp,
                         top = 16.dp,
-                        bottom = bottomPadding
+                        bottom = 160.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
