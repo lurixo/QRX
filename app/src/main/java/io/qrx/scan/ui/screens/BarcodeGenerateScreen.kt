@@ -774,7 +774,7 @@ fun BarcodeItemCard(
                                     bitmap = bitmap.asImageBitmap(),
                                     contentDescription = stringResource(R.string.barcode),
                                     modifier = Modifier.fillMaxSize().background(Color.White),
-                                    filterQuality = FilterQuality.None
+                                    filterQuality = FilterQuality.Low
                                 )
                             }
                         }

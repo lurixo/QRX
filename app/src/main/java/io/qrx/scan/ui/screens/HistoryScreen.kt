@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -35,6 +36,8 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.QrCode2
@@ -509,6 +512,7 @@ fun GenerateHistoryListScreen(
     val historyList by database.generateHistoryDao().getByType(type).collectAsState(initial = emptyList())
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var expandedContentIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
 
     val title = if (type == GenerateType.QR_CODE) stringResource(R.string.qrcode_generate) else stringResource(R.string.barcode_generate)
@@ -738,6 +742,13 @@ fun GenerateHistoryListScreen(
                                 onSave = { saveSingleItem(history) },
                                 isSelectionMode = isSelectionMode,
                                 isSelected = history.id in selectedIds,
+                                isContentExpanded = history.id in expandedContentIds,
+                                onToggleContentExpand = {
+                                    expandedContentIds = if (history.id in expandedContentIds)
+                                        expandedContentIds - history.id
+                                    else
+                                        expandedContentIds + history.id
+                                },
                                 onToggleSelect = { selectedIds = if (history.id in selectedIds) selectedIds - history.id else selectedIds + history.id },
                                 onLongPress = { if (!isSelectionMode) { isSelectionMode = true; selectedIds = setOf(history.id) } },
                                 modifier = Modifier.animateItem(
@@ -770,6 +781,8 @@ fun GenerateHistoryCard(
     modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
+    isContentExpanded: Boolean = false,
+    onToggleContentExpand: () -> Unit = {},
     onToggleSelect: () -> Unit = {},
     onLongPress: () -> Unit = {}
 ) {
@@ -779,6 +792,8 @@ fun GenerateHistoryCard(
         animationSpec = MD3Motion.standardSpec(),
         label = "generateCardColor"
     )
+
+    var hasOverflow by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -793,7 +808,7 @@ fun GenerateHistoryCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Box {
-            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(12.dp).animateContentSize(animationSpec = MD3Motion.emphasizedSpec())) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val imageFile = File(history.imagePath)
                 if (imageFile.exists()) {
@@ -806,7 +821,7 @@ fun GenerateHistoryCard(
                             .background(Color.White, RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = if (history.generateType == GenerateType.QR_CODE) ContentScale.Fit else ContentScale.FillWidth,
-                        filterQuality = FilterQuality.None
+                        filterQuality = FilterQuality.Low
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
@@ -821,9 +836,32 @@ fun GenerateHistoryCard(
                         text = history.content,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        maxLines = if (isContentExpanded) Int.MAX_VALUE else 2,
+                        overflow = TextOverflow.Ellipsis,
+                        onTextLayout = { result ->
+                            if (!isContentExpanded) {
+                                hasOverflow = result.hasVisualOverflow
+                            }
+                        }
                     )
+                    if (hasOverflow || isContentExpanded) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            IconButton(
+                                onClick = onToggleContentExpand,
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    if (isContentExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
                     if (history.barcodeFormat != null) {
                         Text(
                             text = history.barcodeFormat.name.replace("_", "-"),
