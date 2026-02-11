@@ -479,12 +479,12 @@ fun QRCodeGenerateScreen(
                             MD3PressableSurface(
                                 onClick = { saveAllToGallery() },
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh
                             ) {
                                 Surface(
                                     shape = RoundedCornerShape(16.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    shadowElevation = 2.dp
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    shadowElevation = 4.dp
                                 ) {
                                     Row(
                                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -493,12 +493,12 @@ fun QRCodeGenerateScreen(
                                         Icon(
                                             Icons.Default.Save,
                                             null,
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                            tint = MaterialTheme.colorScheme.primary
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             stringResource(R.string.save_all),
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
@@ -508,12 +508,12 @@ fun QRCodeGenerateScreen(
                         MD3PressableSurface(
                             onClick = { addNewItem() },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shadowElevation = 2.dp
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shadowElevation = 4.dp
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -522,12 +522,12 @@ fun QRCodeGenerateScreen(
                                     Icon(
                                         Icons.Outlined.AddCircle,
                                         null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         stringResource(R.string.add),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }

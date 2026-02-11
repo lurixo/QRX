@@ -341,12 +341,12 @@ fun ImageScanScreen(
                     MD3PressableSurface(
                         onClick = { copyAll() },
                         shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                     ) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shadowElevation = 2.dp
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            shadowElevation = 4.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -355,12 +355,12 @@ fun ImageScanScreen(
                                 Icon(
                                     Icons.Outlined.ContentCopy,
                                     null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     stringResource(R.string.copy_all),
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -442,7 +442,7 @@ fun ImageScanScreen(
                             )
                         }
 
-                        item { Spacer(modifier = Modifier.height(80.dp)) }
+                        item { Spacer(modifier = Modifier.height(60.dp)) }
                     }
                 }
             }
