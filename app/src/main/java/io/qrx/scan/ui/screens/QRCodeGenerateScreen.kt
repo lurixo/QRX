@@ -14,16 +14,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -67,7 +64,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -113,16 +109,12 @@ fun QRCodeGenerateScreen(
     val focusManager = LocalFocusManager.current
     val database = (context.applicationContext as QRXApplication).database
     val listState = rememberLazyListState()
-    val density = LocalDensity.current
 
     val items = remember { mutableStateListOf(QRCodeItem()) }
     var isSaving by remember { mutableStateOf(false) }
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-
-    val imeBottom = WindowInsets.ime.getBottom(density)
-    val imeHeightDp = with(density) { imeBottom.toDp() }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -410,6 +402,7 @@ fun QRCodeGenerateScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .imePadding()
             ) {
                 LazyColumn(
                     state = listState,
@@ -418,7 +411,7 @@ fun QRCodeGenerateScreen(
                         start = 16.dp,
                         end = 16.dp,
                         top = 16.dp,
-                        bottom = 160.dp + imeHeightDp
+                        bottom = 160.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -462,8 +455,6 @@ fun QRCodeGenerateScreen(
                     exit = MD3FabAnimations.exit(),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .navigationBarsPadding()
-                        .windowInsetsPadding(WindowInsets.ime)
                         .padding(16.dp)
                 ) {
                     Column(

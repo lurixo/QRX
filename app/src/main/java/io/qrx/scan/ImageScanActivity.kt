@@ -19,7 +19,10 @@ import io.qrx.scan.ui.theme.QRXTheme
 class ImageScanActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        val isDark = resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        setupSystemBars(isDark)
 
         val uris = mutableListOf<Uri>()
         intent.clipData?.let { clip ->
