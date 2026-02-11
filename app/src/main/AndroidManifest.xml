@@ -55,13 +55,13 @@
         <activity
             android:name=".QRCodeGenerateActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.QRX" />
 
         <activity
             android:name=".BarcodeGenerateActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.QRX" />
 
         <activity

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -79,6 +80,7 @@ import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
+import io.qrx.scan.ui.components.suppressBringIntoView
 import io.qrx.scan.util.BarcodeGenerator
 import io.qrx.scan.util.saveToGalleryOnly
 import kotlinx.coroutines.Dispatchers
@@ -115,9 +117,7 @@ fun QRCodeGenerateScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    val density = LocalDensity.current
-    val isKeyboardVisible = WindowInsets.ime.getBottom(density) > 0
-    val imeBottomDp = with(density) { WindowInsets.ime.getBottom(density).toDp() }
+    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -405,16 +405,18 @@ fun QRCodeGenerateScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .imePadding()
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
+                        .suppressBringIntoView(scrollState)
                         .padding(
                             start = 16.dp,
                             end = 16.dp,
                             top = 16.dp,
-                            bottom = maxOf(160.dp, imeBottomDp)
+                            bottom = 160.dp
                         ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
