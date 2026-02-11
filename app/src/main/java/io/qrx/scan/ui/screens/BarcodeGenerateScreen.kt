@@ -17,7 +17,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +64,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
@@ -126,6 +130,17 @@ fun BarcodeGenerateScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var focusedItemIndex by remember { mutableStateOf(-1) }
+    val density = LocalDensity.current
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    val isKeyboardVisible = imeBottomPx > 0
+    val imeBottomDp = with(density) { imeBottomPx.toDp() }
+
+    LaunchedEffect(isKeyboardVisible, focusedItemIndex) {
+        if (isKeyboardVisible && focusedItemIndex >= 0 && focusedItemIndex < items.size) {
+            listState.animateScrollToItem(focusedItemIndex)
+        }
+    }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -420,8 +435,14 @@ fun BarcodeGenerateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .imePadding()
         ) {
+            val bottomPadding = if (isKeyboardVisible) {
+                val scaffoldBottom = paddingValues.calculateBottomPadding()
+                (imeBottomDp - scaffoldBottom).coerceAtLeast(0.dp) + 16.dp
+            } else {
+                160.dp
+            }
+
             LazyColumn(
                 state = listState,
                 modifier = Modifier.fillMaxSize(),
@@ -429,11 +450,11 @@ fun BarcodeGenerateScreen(
                     start = 16.dp,
                     end = 16.dp,
                     top = 16.dp,
-                    bottom = 160.dp
+                    bottom = bottomPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                    itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
                     BarcodeItemCard(
                         item = item,
                         index = index,
@@ -458,6 +479,7 @@ fun BarcodeGenerateScreen(
                                 selectedIds = setOf(item.id)
                             }
                         },
+                        onFocused = { focusedItemIndex = index },
                         modifier = Modifier.animateItem(
                             fadeInSpec = MD3ListAnimations.fadeInSpec(index),
                             fadeOutSpec = MD3ListAnimations.fadeOutSpec(),
@@ -468,7 +490,7 @@ fun BarcodeGenerateScreen(
             }
 
             AnimatedVisibility(
-                visible = !isSelectionMode,
+                visible = !isSelectionMode && !isKeyboardVisible,
                 enter = MD3FabAnimations.enter(),
                 exit = MD3FabAnimations.exit(),
                 modifier = Modifier
@@ -569,7 +591,8 @@ fun BarcodeItemCard(
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
     onToggleSelect: () -> Unit = {},
-    onLongPress: () -> Unit = {}
+    onLongPress: () -> Unit = {},
+    onFocused: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
@@ -692,7 +715,9 @@ fun BarcodeItemCard(
                 OutlinedTextField(
                     value = item.content,
                     onValueChange = onContentChange,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { if (it.isFocused) onFocused() },
                     label = { Text(stringResource(R.string.input_content)) },
                     placeholder = {
                         Text(

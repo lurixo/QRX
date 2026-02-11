@@ -43,13 +43,6 @@ class BarcodeGenerateActivity : ComponentActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val isDark = resources.configuration.uiMode and
-            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-            android.content.res.Configuration.UI_MODE_NIGHT_YES
-        setupSystemBars(isDark)
-    }
 
     private fun setupSystemBars(isDark: Boolean) {
         if (isDark) {
