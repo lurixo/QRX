@@ -850,7 +850,7 @@ fun GenerateHistoryCard(
             }
         }
 
-            AnimatedVisibility(
+            androidx.compose.animation.AnimatedVisibility(
                 visible = isSelectionMode,
                 modifier = Modifier.align(Alignment.TopStart),
                 enter = scaleIn(
