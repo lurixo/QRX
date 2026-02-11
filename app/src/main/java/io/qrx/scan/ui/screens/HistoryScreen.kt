@@ -60,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -767,7 +768,7 @@ fun GenerateHistoryCard(
     onLongPress: () -> Unit = {}
 ) {
     val containerColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        targetValue = if (isSelected) lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.primaryContainer, 0.15f)
         else MaterialTheme.colorScheme.surfaceContainerLow,
         animationSpec = MD3Motion.standardSpec(),
         label = "generateCardColor"

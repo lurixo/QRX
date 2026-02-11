@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.res.stringResource
@@ -91,7 +92,7 @@ fun ScanResultCard(
 ) {
     val containerColor by animateColorAsState(
         targetValue = if (isSelected)
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.primaryContainer, 0.15f)
         else
             MaterialTheme.colorScheme.surfaceContainerLow,
         animationSpec = MD3Motion.standardSpec(),
@@ -353,7 +354,7 @@ fun HistoryCard(
     
     val containerColor by animateColorAsState(
         targetValue = if (isSelected)
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            lerp(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.colorScheme.primaryContainer, 0.15f)
         else
             MaterialTheme.colorScheme.surfaceContainerLow,
         animationSpec = MD3Motion.standardSpec(),
