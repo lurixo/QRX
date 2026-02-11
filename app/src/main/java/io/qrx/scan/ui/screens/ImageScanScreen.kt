@@ -341,12 +341,13 @@ fun ImageScanScreen(
                     MD3PressableSurface(
                         onClick = { copyAll() },
                         shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        color = MaterialTheme.colorScheme.surfaceContainerLow
                     ) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shadowElevation = 4.dp
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            tonalElevation = 2.dp,
+                            shadowElevation = 2.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -442,7 +443,7 @@ fun ImageScanScreen(
                             )
                         }
 
-                        item { Spacer(modifier = Modifier.height(60.dp)) }
+                        item { Spacer(modifier = Modifier.height(80.dp)) }
                     }
                 }
             }

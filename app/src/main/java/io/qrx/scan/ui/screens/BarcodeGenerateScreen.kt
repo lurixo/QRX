@@ -63,7 +63,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -358,7 +357,8 @@ fun BarcodeGenerateScreen(
         }
     }
 
-    Scaffold(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -496,12 +496,13 @@ fun BarcodeGenerateScreen(
                         MD3PressableSurface(
                             onClick = { saveAllToGallery() },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                shadowElevation = 4.dp
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -525,12 +526,13 @@ fun BarcodeGenerateScreen(
                     MD3PressableSurface(
                         onClick = { addNewItem() },
                         shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        color = MaterialTheme.colorScheme.surfaceContainerLow
                     ) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shadowElevation = 4.dp
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            tonalElevation = 2.dp,
+                            shadowElevation = 2.dp
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
@@ -551,13 +553,13 @@ fun BarcodeGenerateScreen(
                     }
                 }
             }
-
-            QRXSnackbar(
-                snackbarData = snackbarData,
-                onDismiss = { snackbarData = null },
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+            }
         }
+
+        QRXSnackbar(
+            snackbarData = snackbarData,
+            onDismiss = { snackbarData = null }
+        )
     }
 }
 
