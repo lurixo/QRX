@@ -61,7 +61,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -557,16 +557,16 @@ fun QRCodeItemCard(
 ) {
     val focusManager = LocalFocusManager.current
     var expanded by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(
-        targetValue = if (item.bitmap != null) 1f else 0.95f,
+    val cardAlpha by animateFloatAsState(
+        targetValue = if (item.bitmap != null) 1f else 0.78f,
         animationSpec = MD3Motion.emphasizedDecelerateSpec(),
-        label = "scale"
+        label = "cardAlpha"
     )
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .scale(scale)
+            .alpha(cardAlpha)
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
