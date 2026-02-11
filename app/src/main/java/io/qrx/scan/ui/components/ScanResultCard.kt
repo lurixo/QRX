@@ -249,7 +249,7 @@ fun ScanResultCard(
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = isSelectionMode,
-                modifier = Modifier.align(Alignment.TopStart),
+                modifier = Modifier.align(Alignment.TopEnd),
                 enter = scaleIn(
                     animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
                     initialScale = 0.6f
@@ -477,7 +477,7 @@ fun HistoryCard(
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = isSelectionMode,
-                modifier = Modifier.align(Alignment.TopStart),
+                modifier = Modifier.align(Alignment.TopEnd),
                 enter = scaleIn(
                     animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
                     initialScale = 0.6f

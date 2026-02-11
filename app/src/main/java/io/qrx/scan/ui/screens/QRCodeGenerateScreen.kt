@@ -781,7 +781,7 @@ fun QRCodeItemCard(
 
             AnimatedVisibility(
                 visible = isSelectionMode && item.bitmap != null,
-                modifier = Modifier.align(Alignment.TopStart),
+                modifier = Modifier.align(Alignment.TopEnd),
                 enter = scaleIn(
                     animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
                     initialScale = 0.6f
