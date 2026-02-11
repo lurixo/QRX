@@ -84,6 +84,7 @@ import io.qrx.scan.R
 import io.qrx.scan.data.GenerateHistoryEntity
 import io.qrx.scan.data.GenerateType
 import io.qrx.scan.data.ScanSource
+import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3StateAnimations
@@ -363,6 +364,98 @@ fun ScanHistoryListScreen(
         exitSelectionMode()
     }
 
+    fun saveSelectedToGallery() {
+        val itemsToSave = historyList.filter { it.id in selectedIds }
+        if (itemsToSave.isEmpty()) return
+
+        scope.launch {
+            var savedCount = 0
+            itemsToSave.forEach { item ->
+                val saved = withContext(Dispatchers.IO) {
+                    try {
+                        val file = File(item.imageUri)
+                        if (file.exists()) {
+                            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                            if (bitmap != null) {
+                                saveToGalleryOnly(context, bitmap, "QRX_${System.currentTimeMillis()}")
+                            } else false
+                        } else false
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+                if (saved) savedCount++
+            }
+
+            withContext(Dispatchers.Main) {
+                if (savedCount > 0) {
+                    snackbarData = SnackbarData(context.getString(R.string.saved_items_to_gallery, savedCount), true)
+                } else {
+                    snackbarData = SnackbarData(context.getString(R.string.save_failed), false)
+                }
+            }
+            exitSelectionMode()
+        }
+    }
+
+    fun saveAllToGallery() {
+        if (historyList.isEmpty()) return
+
+        scope.launch {
+            var savedCount = 0
+            historyList.forEach { item ->
+                val saved = withContext(Dispatchers.IO) {
+                    try {
+                        val file = File(item.imageUri)
+                        if (file.exists()) {
+                            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                            if (bitmap != null) {
+                                saveToGalleryOnly(context, bitmap, "QRX_${System.currentTimeMillis()}")
+                            } else false
+                        } else false
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+                if (saved) savedCount++
+            }
+
+            withContext(Dispatchers.Main) {
+                if (savedCount > 0) {
+                    snackbarData = SnackbarData(context.getString(R.string.saved_items_to_gallery, savedCount), true)
+                } else {
+                    snackbarData = SnackbarData(context.getString(R.string.save_failed), false)
+                }
+            }
+        }
+    }
+
+    fun saveSingleItem(imageUri: String) {
+        scope.launch {
+            val saved = withContext(Dispatchers.IO) {
+                try {
+                    val file = File(imageUri)
+                    if (file.exists()) {
+                        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        if (bitmap != null) {
+                            saveToGalleryOnly(context, bitmap, "QRX_${System.currentTimeMillis()}")
+                        } else false
+                    } else false
+                } catch (e: Exception) {
+                    false
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                if (saved) {
+                    snackbarData = SnackbarData(context.getString(R.string.saved_to_gallery), true)
+                } else {
+                    snackbarData = SnackbarData(context.getString(R.string.save_failed), false)
+                }
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
@@ -375,55 +468,103 @@ fun ScanHistoryListScreen(
                         }
                     },
                     actions = {
-                        if (isSelectionMode) {
-                            IconButton(onClick = { selectedIds = historyList.map { it.id }.toSet() }) {
-                                Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { copySelected() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
-                            }
-                        } else if (historyList.isNotEmpty()) {
-                            IconButton(onClick = { deleteAll() }) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                        AnimatedContent(
+                            targetState = isSelectionMode,
+                            transitionSpec = { MD3Transitions.fadeThrough() },
+                            label = "scanHistoryActionsTransition"
+                        ) { selectionMode ->
+                            Row {
+                                if (selectionMode) {
+                                    IconButton(onClick = { selectedIds = historyList.map { it.id }.toSet() }) {
+                                        Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { copySelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { saveSelectedToGallery() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Default.Save, stringResource(R.string.save), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                } else if (historyList.isNotEmpty()) {
+                                    IconButton(onClick = { deleteAll() }) {
+                                        Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                }
                             }
                         }
                     }
                 )
             },
             floatingActionButton = {
-                if (!isSelectionMode && historyList.isNotEmpty()) {
-                    MD3PressableSurface(
-                        onClick = {
-                            val allCodes = historyList.flatMap { it.codes }.distinct()
-                            clipboardManager.setText(AnnotatedString(allCodes.joinToString("\n")))
-                            snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow
+                AnimatedVisibility(
+                    visible = !isSelectionMode && historyList.isNotEmpty(),
+                    enter = MD3FabAnimations.enter(),
+                    exit = MD3FabAnimations.exit()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Surface(
+                        MD3PressableSurface(
+                            onClick = { saveAllToGallery() },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
-                            shadowElevation = 2.dp
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
                             ) {
-                                Icon(
-                                    Icons.Outlined.ContentCopy,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.copy_all),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Save,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.save_all),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        MD3PressableSurface(
+                            onClick = {
+                                val allCodes = historyList.flatMap { it.codes }.distinct()
+                                clipboardManager.setText(AnnotatedString(allCodes.joinToString("\n")))
+                                snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.ContentCopy,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.copy_all),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
                             }
                         }
                     }
@@ -473,6 +614,7 @@ fun ScanHistoryListScreen(
                                         }
                                     }
                                 },
+                                onSave = { saveSingleItem(history.imageUri) },
                                 isSelectionMode = isSelectionMode,
                                 isSelected = history.id in selectedIds,
                                 onToggleSelect = { selectedIds = if (history.id in selectedIds) selectedIds - history.id else selectedIds + history.id },
@@ -506,6 +648,7 @@ fun GenerateHistoryListScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
@@ -540,6 +683,16 @@ fun GenerateHistoryListScreen(
                 itemsToDelete.forEach { try { File(it.imagePath).delete() } catch (_: Exception) {} }
                 itemsToDelete.forEach { database.generateHistoryDao().delete(it) }
             }
+        }
+        exitSelectionMode()
+    }
+
+    fun copySelected() {
+        val selectedItems = historyList.filter { it.id in selectedIds }
+        val allContent = selectedItems.map { it.content }.distinct()
+        if (allContent.isNotEmpty()) {
+            clipboardManager.setText(AnnotatedString(allContent.joinToString("\n")))
+            snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
         }
         exitSelectionMode()
     }
@@ -648,51 +801,103 @@ fun GenerateHistoryListScreen(
                         }
                     },
                     actions = {
-                        if (isSelectionMode) {
-                            IconButton(onClick = { selectedIds = historyList.map { it.id }.toSet() }) {
-                                Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { saveSelectedToGallery() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Default.Save, stringResource(R.string.save), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
-                            }
-                        } else if (historyList.isNotEmpty()) {
-                            IconButton(onClick = { deleteAll() }) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                        AnimatedContent(
+                            targetState = isSelectionMode,
+                            transitionSpec = { MD3Transitions.fadeThrough() },
+                            label = "generateHistoryActionsTransition"
+                        ) { selectionMode ->
+                            Row {
+                                if (selectionMode) {
+                                    IconButton(onClick = { selectedIds = historyList.map { it.id }.toSet() }) {
+                                        Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { copySelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { saveSelectedToGallery() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Default.Save, stringResource(R.string.save), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                } else if (historyList.isNotEmpty()) {
+                                    IconButton(onClick = { deleteAll() }) {
+                                        Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                }
                             }
                         }
                     }
                 )
             },
             floatingActionButton = {
-                if (!isSelectionMode && historyList.isNotEmpty()) {
-                    MD3PressableSurface(
-                        onClick = { saveAllToGallery() },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow
+                AnimatedVisibility(
+                    visible = !isSelectionMode && historyList.isNotEmpty(),
+                    enter = MD3FabAnimations.enter(),
+                    exit = MD3FabAnimations.exit()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Surface(
+                        MD3PressableSurface(
+                            onClick = {
+                                val allContent = historyList.map { it.content }.distinct()
+                                clipboardManager.setText(AnnotatedString(allContent.joinToString("\n")))
+                                snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
+                            },
                             shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
-                            shadowElevation = 2.dp
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
                             ) {
-                                Icon(
-                                    Icons.Default.Save,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.save_all),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.ContentCopy,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.copy_all),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        MD3PressableSurface(
+                            onClick = { saveAllToGallery() },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                tonalElevation = 2.dp,
+                                shadowElevation = 2.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Save,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        stringResource(R.string.save_all),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
                             }
                         }
                     }
@@ -740,6 +945,10 @@ fun GenerateHistoryListScreen(
                                     }
                                 },
                                 onSave = { saveSingleItem(history) },
+                                onCopy = {
+                                    clipboardManager.setText(AnnotatedString(history.content))
+                                    snackbarData = SnackbarData(context.getString(R.string.copied), true)
+                                },
                                 isSelectionMode = isSelectionMode,
                                 isSelected = history.id in selectedIds,
                                 isContentExpanded = history.id in expandedContentIds,
@@ -778,6 +987,7 @@ fun GenerateHistoryCard(
     context: android.content.Context,
     onDelete: () -> Unit,
     onSave: () -> Unit,
+    onCopy: () -> Unit = {},
     modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -880,6 +1090,9 @@ fun GenerateHistoryCard(
                         Column {
                             IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
                                 Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                            }
+                            IconButton(onClick = onCopy, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(onClick = onSave, modifier = Modifier.size(32.dp)) {
                                 Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)

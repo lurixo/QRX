@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -364,6 +365,7 @@ fun HistoryCard(
     clipboardManager: ClipboardManager,
     context: Context,
     onDelete: () -> Unit,
+    onSave: () -> Unit = {},
     modifier: Modifier = Modifier,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
@@ -438,21 +440,36 @@ fun HistoryCard(
                     )
                 }
 
-                AnimatedVisibility(
-                    visible = !isSelectionMode,
-                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
-                ) {
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
+                Box(modifier = Modifier.width(32.dp)) {
+                    AnimatedVisibility(
+                        visible = !isSelectionMode,
+                        enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                        exit = fadeOut(animationSpec = MD3Motion.standardSpec())
                     ) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        Column {
+                            IconButton(
+                                onClick = onDelete,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            IconButton(
+                                onClick = onSave,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Save,
+                                    contentDescription = stringResource(R.string.save),
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                 }
             }

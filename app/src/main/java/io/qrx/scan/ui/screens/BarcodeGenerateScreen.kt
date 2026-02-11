@@ -2,6 +2,7 @@ package io.qrx.scan.ui.screens
 
 import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
@@ -86,6 +87,7 @@ import io.qrx.scan.data.GenerateType
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3StateAnimations
+import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
@@ -382,45 +384,53 @@ fun BarcodeGenerateScreen(
                     }
                 },
                 actions = {
-                    if (isSelectionMode) {
-                        IconButton(onClick = { selectAll() }) {
-                            Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
-                        }
-                        IconButton(
-                            onClick = { saveSelectedToGallery() },
-                            enabled = selectedIds.isNotEmpty()
-                        ) {
-                            Icon(Icons.Default.Save, stringResource(R.string.save), tint = MaterialTheme.colorScheme.primary)
-                        }
-                        IconButton(
-                            onClick = { deleteSelected() },
-                            enabled = selectedIds.isNotEmpty()
-                        ) {
-                            Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
-                        }
-                    } else {
-                        Surface(
-                            onClick = { generateAll() },
-                            modifier = Modifier.padding(end = 8.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
-                            shadowElevation = 2.dp
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Outlined.ViewWeek,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.generate),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                    AnimatedContent(
+                        targetState = isSelectionMode,
+                        transitionSpec = { MD3Transitions.fadeThrough() },
+                        label = "barcodeGenerateActionsTransition"
+                    ) { selectionMode ->
+                        Row {
+                            if (selectionMode) {
+                                IconButton(onClick = { selectAll() }) {
+                                    Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(
+                                    onClick = { saveSelectedToGallery() },
+                                    enabled = selectedIds.isNotEmpty()
+                                ) {
+                                    Icon(Icons.Default.Save, stringResource(R.string.save), tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(
+                                    onClick = { deleteSelected() },
+                                    enabled = selectedIds.isNotEmpty()
+                                ) {
+                                    Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
+                                }
+                            } else {
+                                Surface(
+                                    onClick = { generateAll() },
+                                    modifier = Modifier.padding(end = 8.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    tonalElevation = 2.dp,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.ViewWeek,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            stringResource(R.string.generate),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -790,17 +800,30 @@ fun BarcodeItemCard(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    if (!isSelectionMode && item.bitmap != null) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        FilledTonalIconButton(
-                            onClick = onSave,
-                            modifier = Modifier.size(40.dp)
+                    AnimatedVisibility(
+                        visible = !isSelectionMode && item.bitmap != null,
+                        enter = expandVertically(
+                            animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.MEDIUM1)
+                        ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                        exit = shrinkVertically(
+                            animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4)
+                        ) + fadeOut(animationSpec = MD3Motion.standardSpec())
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
-                                Icons.Default.Save,
-                                contentDescription = stringResource(R.string.save_to_gallery),
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            FilledTonalIconButton(
+                                onClick = onSave,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Save,
+                                    contentDescription = stringResource(R.string.save_to_gallery),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }

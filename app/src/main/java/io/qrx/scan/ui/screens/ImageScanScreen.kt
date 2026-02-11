@@ -61,6 +61,7 @@ import io.qrx.scan.QRXApplication
 import io.qrx.scan.R
 import io.qrx.scan.data.ScanHistoryEntity
 import io.qrx.scan.data.ScanSource
+import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3StateAnimations
 import io.qrx.scan.ui.animation.MD3Transitions
@@ -314,30 +315,42 @@ fun ImageScanScreen(
                         }
                     },
                     actions = {
-                        if (isSelectionMode) {
-                            IconButton(onClick = { selectedIds = scanResults.filter { !it.isProcessing }.map { it.id }.toSet() }) {
-                                Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { copySelected() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
-                            }
-                        } else {
-                            IconButton(
-                                onClick = {
-                                    photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        AnimatedContent(
+                            targetState = isSelectionMode,
+                            transitionSpec = { MD3Transitions.fadeThrough() },
+                            label = "imageScanActionsTransition"
+                        ) { selectionMode ->
+                            Row {
+                                if (selectionMode) {
+                                    IconButton(onClick = { selectedIds = scanResults.filter { !it.isProcessing }.map { it.id }.toSet() }) {
+                                        Icon(Icons.Default.SelectAll, stringResource(R.string.select_all), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { copySelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                    IconButton(onClick = { deleteSelected() }, enabled = selectedIds.isNotEmpty()) {
+                                        Icon(Icons.Default.Delete, stringResource(R.string.delete), tint = MaterialTheme.colorScheme.primary)
+                                    }
+                                } else {
+                                    IconButton(
+                                        onClick = {
+                                            photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                        }
+                                    ) {
+                                        Icon(Icons.Outlined.Photo, stringResource(R.string.select_image), tint = MaterialTheme.colorScheme.primary)
+                                    }
                                 }
-                            ) {
-                                Icon(Icons.Outlined.Photo, stringResource(R.string.select_image), tint = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }
                 )
             },
             floatingActionButton = {
-                if (!isSelectionMode && scanResults.any { it.codes.isNotEmpty() }) {
+                AnimatedVisibility(
+                    visible = !isSelectionMode && scanResults.any { it.codes.isNotEmpty() },
+                    enter = MD3FabAnimations.enter(),
+                    exit = MD3FabAnimations.exit()
+                ) {
                     MD3PressableSurface(
                         onClick = { copyAll() },
                         shape = RoundedCornerShape(16.dp),
