@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -127,7 +126,9 @@ fun BarcodeGenerateScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val density = LocalDensity.current
+    val isKeyboardVisible = WindowInsets.ime.getBottom(density) > 0
+    val imeBottomDp = with(density) { WindowInsets.ime.getBottom(density).toDp() }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -422,7 +423,6 @@ fun BarcodeGenerateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .imePadding()
         ) {
             Column(
                 modifier = Modifier
@@ -432,7 +432,7 @@ fun BarcodeGenerateScreen(
                         start = 16.dp,
                         end = 16.dp,
                         top = 16.dp,
-                        bottom = 160.dp
+                        bottom = maxOf(160.dp, imeBottomDp)
                     ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
