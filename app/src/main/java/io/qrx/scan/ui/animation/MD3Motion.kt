@@ -141,6 +141,16 @@ object MD3Motion {
         dampingRatio: Float = Spring.DampingRatioMediumBouncy,
         stiffness: Float = Spring.StiffnessMedium
     ): FiniteAnimationSpec<T> = spring(dampingRatio, stiffness)
+
+    fun <T> bouncyExpandSpec(): FiniteAnimationSpec<T> = spring(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessMediumLow
+    )
+
+    fun <T> smoothCollapseSpec(): FiniteAnimationSpec<T> = spring(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = Spring.StiffnessMedium
+    )
 }
 
 object MD3Transitions {

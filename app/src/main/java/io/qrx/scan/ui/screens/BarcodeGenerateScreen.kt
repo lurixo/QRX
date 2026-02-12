@@ -61,6 +61,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
@@ -68,6 +69,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,6 +77,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -102,6 +105,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlin.math.abs
 
 data class BarcodeItem(
     val id: String = UUID.randomUUID().toString(),
@@ -145,9 +149,29 @@ fun BarcodeGenerateScreen(
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
     val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
+    var selectionAnchorIndex by remember { mutableStateOf(-1) }
+    var selectionAnchorScreenY by remember { mutableStateOf(0f) }
+    val cardScreenYMap = remember { mutableMapOf<Int, Float>() }
+
     BackHandler(enabled = isSelectionMode) {
+        val topIdx = cardScreenYMap.entries.filter { it.value >= 0f }.minByOrNull { it.value }?.key ?: 0
+        selectionAnchorIndex = topIdx
+        selectionAnchorScreenY = cardScreenYMap[topIdx] ?: 0f
         isSelectionMode = false
         selectedIds = emptySet()
+    }
+
+    LaunchedEffect(selectionAnchorIndex) {
+        if (selectionAnchorIndex < 0) return@LaunchedEffect
+        val targetScreenY = selectionAnchorScreenY
+        repeat(60) {
+            withFrameNanos { }
+            val currentY = cardScreenYMap[selectionAnchorIndex] ?: return@repeat
+            val delta = currentY - targetScreenY
+            if (abs(delta) > 0.5f) {
+                scrollState.scrollBy(delta)
+            }
+        }
     }
 
     fun addNewItem() {
@@ -259,6 +283,9 @@ fun BarcodeGenerateScreen(
     }
 
     fun exitSelectionMode() {
+        val topIdx = cardScreenYMap.entries.filter { it.value >= 0f }.minByOrNull { it.value }?.key ?: 0
+        selectionAnchorIndex = topIdx
+        selectionAnchorScreenY = cardScreenYMap[topIdx] ?: 0f
         isSelectionMode = false
         selectedIds = emptySet()
     }
@@ -488,6 +515,9 @@ fun BarcodeGenerateScreen(
                             onGenerate = { generateBarcode(index) },
                             onDelete = { removeItem(index) },
                             onSave = { saveSingleItem(item) },
+                            modifier = Modifier.onGloballyPositioned { coords ->
+                                cardScreenYMap[index] = coords.positionInWindow().y
+                            },
                             isSelectionMode = isSelectionMode,
                             isSelected = item.id in selectedIds,
                             onToggleSelect = {
@@ -499,6 +529,8 @@ fun BarcodeGenerateScreen(
                             },
                             onLongPress = {
                                 if (!isSelectionMode && item.bitmap != null) {
+                                    selectionAnchorIndex = index
+                                    selectionAnchorScreenY = cardScreenYMap[index] ?: 0f
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isSelectionMode = true
                                     selectedIds = setOf(item.id)
@@ -688,10 +720,10 @@ fun BarcodeItemCard(
             AnimatedVisibility(
                 visible = !isSelectionMode,
                 enter = expandVertically(
-                    animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.MEDIUM1)
+                    animationSpec = MD3Motion.bouncyExpandSpec()
                 ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
                 exit = shrinkVertically(
-                    animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4)
+                    animationSpec = MD3Motion.smoothCollapseSpec()
                 ) + fadeOut(animationSpec = MD3Motion.standardSpec())
             ) {
             Column {
@@ -830,10 +862,10 @@ fun BarcodeItemCard(
                     AnimatedVisibility(
                         visible = !isSelectionMode && item.bitmap != null,
                         enter = expandVertically(
-                            animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.MEDIUM1)
+                            animationSpec = MD3Motion.bouncyExpandSpec()
                         ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
                         exit = shrinkVertically(
-                            animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT4)
+                            animationSpec = MD3Motion.smoothCollapseSpec()
                         ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                     ) {
                         Column(
