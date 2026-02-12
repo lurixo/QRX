@@ -12,12 +12,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,6 +97,7 @@ import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
+import io.qrx.scan.ui.components.cardGestures
 import io.qrx.scan.ui.components.suppressBringIntoView
 import io.qrx.scan.util.BarcodeGenerator
 import io.qrx.scan.util.saveToGalleryOnly
@@ -639,7 +637,6 @@ fun BarcodeGenerateScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BarcodeItemCard(
     item: BarcodeItem,
@@ -671,9 +668,7 @@ fun BarcodeItemCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+            .cardGestures(
                 onClick = { if (isSelectionMode && item.bitmap != null) onToggleSelect() },
                 onLongClick = onLongPress
             ),
@@ -713,8 +708,7 @@ fun BarcodeItemCard(
                     ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                 ) {
                     IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
+                        onClick = onDelete
                     ) {
                         Icon(
                             Icons.Default.Close,

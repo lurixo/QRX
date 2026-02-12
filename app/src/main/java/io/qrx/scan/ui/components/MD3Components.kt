@@ -16,7 +16,8 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -50,9 +51,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -61,6 +60,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -114,7 +115,8 @@ fun MD3PressableIconButton(
     tint: Color = MaterialTheme.colorScheme.primary,
     pressScale: Float = 0.85f
 ) {
-    var isPressed by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     
     val scale by animateFloatAsState(
         targetValue = if (isPressed && enabled) pressScale else 1f,
@@ -124,20 +126,9 @@ fun MD3PressableIconButton(
 
     IconButton(
         onClick = onClick,
-        modifier = modifier
-            .scale(scale)
-            .pointerInput(enabled) {
-                detectTapGestures(
-                    onPress = {
-                        if (enabled) {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        }
-                    }
-                )
-            },
+        modifier = modifier.scale(scale),
         enabled = enabled,
+        interactionSource = interactionSource,
         colors = IconButtonDefaults.iconButtonColors(
             contentColor = tint,
             disabledContentColor = tint.copy(alpha = 0.38f)
@@ -148,6 +139,34 @@ fun MD3PressableIconButton(
             contentDescription = contentDescription,
             tint = if (enabled) tint else tint.copy(alpha = 0.38f)
         )
+    }
+}
+
+fun Modifier.cardGestures(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+): Modifier = this.pointerInput(onClick, onLongClick) {
+    awaitEachGesture {
+        val down = awaitFirstDown(pass = PointerEventPass.Final, requireUnconsumed = false)
+        if (down.isConsumed) return@awaitEachGesture
+
+        try {
+            withTimeout(viewConfiguration.longPressTimeoutMillis) {
+                while (true) {
+                    val event = awaitPointerEvent(PointerEventPass.Final)
+                    if (event.changes.any { it.isConsumed }) return@awaitEachGesture
+                    if (event.changes.all { !it.pressed }) {
+                        onClick()
+                        return@awaitEachGesture
+                    }
+                }
+            }
+        } catch (_: PointerEventTimeoutCancellationException) {
+            onLongClick()
+            do {
+                val event = awaitPointerEvent(PointerEventPass.Final)
+            } while (event.changes.any { it.pressed })
+        }
     }
 }
 

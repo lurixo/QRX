@@ -14,9 +14,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,7 +85,6 @@ private fun openUrl(context: Context, url: String, errorMsg: String, onError: ((
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScanResultCard(
     result: ScanResult,
@@ -114,12 +110,8 @@ fun ScanResultCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {
-                    if (isSelectionMode) onToggleSelect()
-                },
+            .cardGestures(
+                onClick = { if (isSelectionMode) onToggleSelect() },
                 onLongClick = onLongPress
             ),
         colors = CardDefaults.cardColors(containerColor = containerColor),
@@ -227,8 +219,7 @@ fun ScanResultCard(
                     ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                 ) {
                     IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
+                        onClick = onDelete
                     ) {
                         Icon(
                             Icons.Default.Close,
@@ -323,8 +314,7 @@ fun CodeItemFullWidth(
         ) {
             if (isLongCode) {
                 IconButton(
-                    onClick = { expanded = !expanded },
-                    modifier = Modifier.size(32.dp)
+                    onClick = { expanded = !expanded }
                 ) {
                     Icon(
                         if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -337,8 +327,7 @@ fun CodeItemFullWidth(
 
             if (isLink) {
                 IconButton(
-                    onClick = { openUrl(context, code, cannotOpenLinkText, onShowSnackbar) },
-                    modifier = Modifier.size(32.dp)
+                    onClick = { openUrl(context, code, cannotOpenLinkText, onShowSnackbar) }
                 ) {
                     Icon(
                         Icons.Default.OpenInBrowser,
@@ -353,8 +342,7 @@ fun CodeItemFullWidth(
                 onClick = {
                     clipboardManager.setText(AnnotatedString(code))
                     onShowSnackbar?.invoke(copiedText, true)
-                },
-                modifier = Modifier.size(32.dp)
+                }
             ) {
                 Icon(
                     Icons.Outlined.ContentCopy,
@@ -367,7 +355,6 @@ fun CodeItemFullWidth(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HistoryCard(
     imageUri: String?,
@@ -404,12 +391,8 @@ fun HistoryCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {
-                    if (isSelectionMode) onToggleSelect()
-                },
+            .cardGestures(
+                onClick = { if (isSelectionMode) onToggleSelect() },
                 onLongClick = onLongPress
             ),
         colors = CardDefaults.cardColors(containerColor = containerColor),
@@ -457,7 +440,7 @@ fun HistoryCard(
                     )
                 }
 
-                Box(modifier = Modifier.size(width = 32.dp, height = 96.dp)) {
+                Box(modifier = Modifier.width(48.dp)) {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
                         enter = scaleIn(
@@ -478,7 +461,7 @@ fun HistoryCard(
                                     }
                                     onDelete()
                                 },
-                                modifier = Modifier.size(32.dp).scale(deleteScale.value)
+                                modifier = Modifier.scale(deleteScale.value)
                             ) {
                                 Icon(
                                     Icons.Default.Close,
@@ -495,7 +478,7 @@ fun HistoryCard(
                                     }
                                     onCopy()
                                 },
-                                modifier = Modifier.size(32.dp).scale(copyScale.value)
+                                modifier = Modifier.scale(copyScale.value)
                             ) {
                                 Icon(
                                     Icons.Outlined.ContentCopy,
@@ -512,7 +495,7 @@ fun HistoryCard(
                                     }
                                     onSave()
                                 },
-                                modifier = Modifier.size(32.dp).scale(saveScale.value)
+                                modifier = Modifier.scale(saveScale.value)
                             ) {
                                 Icon(
                                     Icons.Default.Save,

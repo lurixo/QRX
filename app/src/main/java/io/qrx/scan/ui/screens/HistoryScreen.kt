@@ -12,11 +12,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -102,6 +99,7 @@ import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
+import io.qrx.scan.ui.components.cardGestures
 import io.qrx.scan.util.formatTimestamp
 import io.qrx.scan.util.saveToGalleryOnly
 import kotlinx.coroutines.Dispatchers
@@ -1041,7 +1039,6 @@ fun GenerateHistoryListScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GenerateHistoryCard(
     history: GenerateHistoryEntity,
@@ -1074,9 +1071,7 @@ fun GenerateHistoryCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+            .cardGestures(
                 onClick = { if (isSelectionMode) onToggleSelect() },
                 onLongClick = onLongPress
             ),
@@ -1129,8 +1124,7 @@ fun GenerateHistoryCard(
                             horizontalArrangement = Arrangement.End
                         ) {
                             IconButton(
-                                onClick = onToggleContentExpand,
-                                modifier = Modifier.size(32.dp)
+                                onClick = onToggleContentExpand
                             ) {
                                 Icon(
                                     if (isContentExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -1150,7 +1144,7 @@ fun GenerateHistoryCard(
                     }
                 }
 
-                Box(modifier = Modifier.size(width = 32.dp, height = 96.dp)) {
+                Box(modifier = Modifier.width(48.dp)) {
                     androidx.compose.animation.AnimatedVisibility(
                         visible = !isSelectionMode,
                         enter = scaleIn(
@@ -1171,7 +1165,7 @@ fun GenerateHistoryCard(
                                     }
                                     onDelete()
                                 },
-                                modifier = Modifier.size(32.dp).scale(deleteScale.value)
+                                modifier = Modifier.scale(deleteScale.value)
                             ) {
                                 Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
@@ -1183,7 +1177,7 @@ fun GenerateHistoryCard(
                                     }
                                     onCopy()
                                 },
-                                modifier = Modifier.size(32.dp).scale(copyScale.value)
+                                modifier = Modifier.scale(copyScale.value)
                             ) {
                                 Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
@@ -1195,7 +1189,7 @@ fun GenerateHistoryCard(
                                     }
                                     onSave()
                                 },
-                                modifier = Modifier.size(32.dp).scale(saveScale.value)
+                                modifier = Modifier.scale(saveScale.value)
                             ) {
                                 Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
