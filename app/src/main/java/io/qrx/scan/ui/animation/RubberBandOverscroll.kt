@@ -9,11 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.node.DelegatableNode
-import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.LayoutModifierNode
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -97,14 +99,19 @@ class RubberBandOverscrollEffect(
     override val isInProgress: Boolean
         get() = abs(overscrollOffset.value) > 0.5f
 
-    override val node: DelegatableNode = object : Modifier.Node(), DrawModifierNode {
-        override fun ContentDrawScope.draw() {
-            containerHeight = size.height
-            val snappedOffset = if (abs(overscrollOffset.value) > 0.5f)
-                overscrollOffset.value.roundToInt().toFloat()
-            else 0f
-            translate(top = snappedOffset) {
-                this@draw.drawContent()
+    override val node: DelegatableNode = object : Modifier.Node(), LayoutModifierNode {
+        override fun MeasureScope.measure(
+            measurable: Measurable,
+            constraints: Constraints
+        ): MeasureResult {
+            val placeable = measurable.measure(constraints)
+            containerHeight = placeable.height.toFloat()
+            return layout(placeable.width, placeable.height) {
+                placeable.placeWithLayer(0, 0) {
+                    translationY = if (abs(overscrollOffset.value) > 0.5f)
+                        overscrollOffset.value.roundToInt().toFloat()
+                    else 0f
+                }
             }
         }
     }
