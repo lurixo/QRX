@@ -143,7 +143,6 @@ fun ScanResultCard(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(result.savedPath ?: result.uri)
                         .size(Size.ORIGINAL)
-                        .crossfade(false)
                         .build(),
                     contentDescription = null,
                     modifier = Modifier
@@ -439,7 +438,6 @@ fun HistoryCard(
                             model = ImageRequest.Builder(LocalContext.current)
                                 .data(imageModel)
                                 .size(Size.ORIGINAL)
-                                .crossfade(false)
                                 .build(),
                             contentDescription = null,
                             modifier = Modifier
