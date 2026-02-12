@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.math.sign
 
 class RubberBandOverscrollEffect(
@@ -99,7 +100,10 @@ class RubberBandOverscrollEffect(
     override val node: DelegatableNode = object : Modifier.Node(), DrawModifierNode {
         override fun ContentDrawScope.draw() {
             containerHeight = size.height
-            translate(top = overscrollOffset.value) {
+            val snappedOffset = if (abs(overscrollOffset.value) > 0.5f)
+                overscrollOffset.value.roundToInt().toFloat()
+            else 0f
+            translate(top = snappedOffset) {
                 this@draw.drawContent()
             }
         }
