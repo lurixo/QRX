@@ -81,6 +81,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.size.Size
 import io.qrx.scan.QRXApplication
 import io.qrx.scan.R
 import io.qrx.scan.data.GenerateHistoryEntity
@@ -1034,7 +1036,10 @@ fun GenerateHistoryCard(
                     val imageFile = File(history.imagePath)
                 if (imageFile.exists()) {
                     AsyncImage(
-                        model = imageFile,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageFile)
+                            .size(Size.ORIGINAL)
+                            .build(),
                         contentDescription = null,
                         modifier = Modifier
                             .size(if (history.generateType == GenerateType.QR_CODE) 60.dp else 80.dp)
