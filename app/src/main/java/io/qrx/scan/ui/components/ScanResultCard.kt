@@ -290,9 +290,6 @@ fun CodeItemFullWidth(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = MD3Motion.emphasizedSpec()
-            )
     ) {
         Text(
             text = code,
@@ -302,7 +299,11 @@ fun CodeItemFullWidth(
             color = if (isLink) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             maxLines = if (expanded) Int.MAX_VALUE else 3,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(
+                    animationSpec = MD3Motion.emphasizedSpec()
+                )
         )
 
         Spacer(modifier = Modifier.height(6.dp))

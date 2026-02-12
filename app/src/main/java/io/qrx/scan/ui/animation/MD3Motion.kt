@@ -267,7 +267,7 @@ object MD3ListAnimations {
 
     fun <T> placementSpec(): FiniteAnimationSpec<T> =
         spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
+            dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMediumLow
         )
 }
