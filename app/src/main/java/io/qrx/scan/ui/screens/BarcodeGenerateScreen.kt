@@ -154,24 +154,31 @@ fun BarcodeGenerateScreen(
     var selectionAnchorIndex by remember { mutableStateOf(-1) }
     var selectionAnchorScreenY by remember { mutableStateOf(0f) }
     val cardScreenYMap = remember { mutableMapOf<Int, Float>() }
+    var scrollCompensationTrigger by remember { mutableStateOf(0) }
 
     BackHandler(enabled = isSelectionMode) {
         val topIdx = cardScreenYMap.entries.filter { it.value >= 0f }.minByOrNull { it.value }?.key ?: 0
         selectionAnchorIndex = topIdx
         selectionAnchorScreenY = cardScreenYMap[topIdx] ?: 0f
+        scrollCompensationTrigger++
         isSelectionMode = false
         selectedIds = emptySet()
     }
 
-    LaunchedEffect(selectionAnchorIndex) {
+    LaunchedEffect(scrollCompensationTrigger) {
         if (selectionAnchorIndex < 0) return@LaunchedEffect
         val targetScreenY = selectionAnchorScreenY
+        var stableFrames = 0
         repeat(60) {
             withFrameNanos { }
             val currentY = cardScreenYMap[selectionAnchorIndex] ?: return@repeat
             val delta = currentY - targetScreenY
             if (abs(delta) > 0.5f) {
                 scrollState.scrollBy(delta)
+                stableFrames = 0
+            } else {
+                stableFrames++
+                if (stableFrames > 3) return@repeat
             }
         }
     }
@@ -288,6 +295,7 @@ fun BarcodeGenerateScreen(
         val topIdx = cardScreenYMap.entries.filter { it.value >= 0f }.minByOrNull { it.value }?.key ?: 0
         selectionAnchorIndex = topIdx
         selectionAnchorScreenY = cardScreenYMap[topIdx] ?: 0f
+        scrollCompensationTrigger++
         isSelectionMode = false
         selectedIds = emptySet()
     }
@@ -533,6 +541,7 @@ fun BarcodeGenerateScreen(
                                 if (!isSelectionMode && item.bitmap != null) {
                                     selectionAnchorIndex = index
                                     selectionAnchorScreenY = cardScreenYMap[index] ?: 0f
+                                    scrollCompensationTrigger++
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isSelectionMode = true
                                     selectedIds = setOf(item.id)
