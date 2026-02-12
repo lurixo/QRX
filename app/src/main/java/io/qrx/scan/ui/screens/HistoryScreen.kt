@@ -633,7 +633,7 @@ fun ScanHistoryListScreen(
                                 )
                             )
                         }
-                        item { Spacer(modifier = Modifier.height(80.dp)) }
+                        item { Spacer(modifier = Modifier.height(150.dp)) }
                     }
                 }
             }
@@ -973,7 +973,7 @@ fun GenerateHistoryListScreen(
                                 )
                             )
                         }
-                        item { Spacer(modifier = Modifier.height(80.dp)) }
+                        item { Spacer(modifier = Modifier.height(150.dp)) }
                     }
                 }
             }
@@ -1042,7 +1042,7 @@ fun GenerateHistoryCard(
                             .background(Color.White, RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = if (history.generateType == GenerateType.QR_CODE) ContentScale.Fit else ContentScale.FillWidth,
-                        filterQuality = FilterQuality.Low
+                        filterQuality = FilterQuality.None
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }

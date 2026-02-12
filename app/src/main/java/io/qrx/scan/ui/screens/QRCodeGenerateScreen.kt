@@ -756,7 +756,7 @@ fun QRCodeItemCard(
                                     bitmap = bitmap.asImageBitmap(),
                                     contentDescription = stringResource(R.string.qrcode),
                                     modifier = Modifier.fillMaxSize().background(Color.White),
-                                    filterQuality = FilterQuality.Low
+                                    filterQuality = FilterQuality.None
                                 )
                             }
                         }
