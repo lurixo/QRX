@@ -8,6 +8,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -309,10 +310,16 @@ fun ImageScanScreen(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
                         IconButton(onClick = { if (isSelectionMode) exitSelectionMode() else onNavigateBack() }) {
-                            Icon(
-                                if (isSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
-                                stringResource(R.string.back)
-                            )
+                            Crossfade(
+                                targetState = isSelectionMode,
+                                animationSpec = MD3Motion.standardSpec(),
+                                label = "imageScanNavIconCrossfade"
+                            ) { inSelectionMode ->
+                                Icon(
+                                    if (inSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
+                                    stringResource(R.string.back)
+                                )
+                            }
                         }
                     },
                     actions = {

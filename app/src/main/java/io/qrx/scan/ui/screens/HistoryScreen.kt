@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -151,7 +152,11 @@ fun HistoryMainScreen(
                         }
                     },
                     actions = {
-                        if (totalCount > 0) {
+                        AnimatedVisibility(
+                            visible = totalCount > 0,
+                            enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
+                            exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                        ) {
                             IconButton(onClick = { deleteAll() }) {
                                 Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
                             }
@@ -470,7 +475,13 @@ fun ScanHistoryListScreen(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
                         IconButton(onClick = { if (isSelectionMode) exitSelectionMode() else onNavigateBack() }) {
-                            Icon(if (isSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
+                            Crossfade(
+                                targetState = isSelectionMode,
+                                animationSpec = MD3Motion.standardSpec(),
+                                label = "scanHistoryNavIconCrossfade"
+                            ) { inSelectionMode ->
+                                Icon(if (inSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
+                            }
                         }
                     },
                     actions = {
@@ -808,7 +819,13 @@ fun GenerateHistoryListScreen(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
                         IconButton(onClick = { if (isSelectionMode) exitSelectionMode() else onNavigateBack() }) {
-                            Icon(if (isSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
+                            Crossfade(
+                                targetState = isSelectionMode,
+                                animationSpec = MD3Motion.standardSpec(),
+                                label = "generateHistoryNavIconCrossfade"
+                            ) { inSelectionMode ->
+                                Icon(if (inSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
+                            }
                         }
                     },
                     actions = {

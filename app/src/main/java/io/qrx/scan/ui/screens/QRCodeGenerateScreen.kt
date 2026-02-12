@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -359,10 +360,16 @@ fun QRCodeGenerateScreen(
                         IconButton(onClick = {
                             if (isSelectionMode) exitSelectionMode() else onNavigateBack()
                         }) {
-                            Icon(
-                                if (isSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
-                                stringResource(R.string.back)
-                            )
+                            Crossfade(
+                                targetState = isSelectionMode,
+                                animationSpec = MD3Motion.standardSpec(),
+                                label = "qrGenerateNavIconCrossfade"
+                            ) { inSelectionMode ->
+                                Icon(
+                                    if (inSelectionMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack,
+                                    stringResource(R.string.back)
+                                )
+                            }
                         }
                     },
                     actions = {
