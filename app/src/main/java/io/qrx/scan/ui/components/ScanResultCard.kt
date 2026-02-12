@@ -56,12 +56,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import io.qrx.scan.R
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
@@ -133,15 +135,13 @@ fun ScanResultCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    PixelPerfectImage(
+                    AsyncImage(
                     model = result.savedPath ?: result.uri,
                     contentDescription = null,
                     modifier = Modifier
                         .size(60.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    targetWidth = 60.dp,
-                    targetHeight = 60.dp,
-                    scaleMode = PixelScaleMode.CROP
+                    contentScale = ContentScale.Crop
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -426,15 +426,13 @@ fun HistoryCard(
                         try { imageUri.toUri() } catch (e: Exception) { null }
                     }
                     if (imageModel != null) {
-                        PixelPerfectImage(
+                        AsyncImage(
                             model = imageModel,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(60.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            targetWidth = 60.dp,
-                            targetHeight = 60.dp,
-                            scaleMode = PixelScaleMode.CROP
+                            contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                     }

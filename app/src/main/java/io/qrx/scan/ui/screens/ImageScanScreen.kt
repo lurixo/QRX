@@ -416,7 +416,8 @@ fun ImageScanScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        overscrollEffect = null
                     ) {
                         if (!isScanning && scanResults.isNotEmpty() && !isSelectionMode) {
                             item {
