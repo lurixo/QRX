@@ -70,19 +70,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.size.Size
 import io.qrx.scan.QRXApplication
 import io.qrx.scan.R
 import io.qrx.scan.data.GenerateHistoryEntity
@@ -96,6 +91,8 @@ import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.components.HistoryCard
 import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.MD3SelectionIcon
+import io.qrx.scan.ui.components.PixelPerfectImage
+import io.qrx.scan.ui.components.PixelScaleMode
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
 import io.qrx.scan.util.formatTimestamp
@@ -1035,19 +1032,17 @@ fun GenerateHistoryCard(
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     val imageFile = File(history.imagePath)
                 if (imageFile.exists()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageFile)
-                            .size(Size.ORIGINAL)
-                            .build(),
+                    PixelPerfectImage(
+                        model = imageFile,
                         contentDescription = null,
                         modifier = Modifier
                             .size(if (history.generateType == GenerateType.QR_CODE) 60.dp else 80.dp)
                             .height(if (history.generateType == GenerateType.QR_CODE) 60.dp else 40.dp)
                             .background(Color.White, RoundedCornerShape(8.dp))
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = if (history.generateType == GenerateType.QR_CODE) ContentScale.Fit else ContentScale.FillWidth,
-                        filterQuality = FilterQuality.None
+                        targetWidth = if (history.generateType == GenerateType.QR_CODE) 60.dp else 80.dp,
+                        targetHeight = if (history.generateType == GenerateType.QR_CODE) 60.dp else 40.dp,
+                        scaleMode = if (history.generateType == GenerateType.QR_CODE) PixelScaleMode.FIT else PixelScaleMode.FILL_WIDTH
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }

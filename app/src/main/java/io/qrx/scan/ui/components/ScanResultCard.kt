@@ -55,19 +55,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.size.Size
 import io.qrx.scan.R
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
@@ -139,17 +133,15 @@ fun ScanResultCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(result.savedPath ?: result.uri)
-                        .size(Size.ORIGINAL)
-                        .build(),
+                    PixelPerfectImage(
+                    model = result.savedPath ?: result.uri,
                     contentDescription = null,
                     modifier = Modifier
                         .size(60.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop,
-                    filterQuality = FilterQuality.None
+                    targetWidth = 60.dp,
+                    targetHeight = 60.dp,
+                    scaleMode = PixelScaleMode.CROP
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -434,17 +426,15 @@ fun HistoryCard(
                         try { imageUri.toUri() } catch (e: Exception) { null }
                     }
                     if (imageModel != null) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(imageModel)
-                                .size(Size.ORIGINAL)
-                                .build(),
+                        PixelPerfectImage(
+                            model = imageModel,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(60.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop,
-                            filterQuality = FilterQuality.None
+                            targetWidth = 60.dp,
+                            targetHeight = 60.dp,
+                            scaleMode = PixelScaleMode.CROP
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                     }
