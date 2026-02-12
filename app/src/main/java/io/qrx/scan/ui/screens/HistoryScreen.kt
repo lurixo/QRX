@@ -1039,6 +1039,7 @@ fun GenerateHistoryCard(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageFile)
                             .size(Size.ORIGINAL)
+                            .crossfade(false)
                             .build(),
                         contentDescription = null,
                         modifier = Modifier

@@ -55,15 +55,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.size.Size
 import io.qrx.scan.R
 import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
@@ -136,12 +140,17 @@ fun ScanResultCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
-                    model = result.savedPath ?: result.uri,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(result.savedPath ?: result.uri)
+                        .size(Size.ORIGINAL)
+                        .crossfade(false)
+                        .build(),
                     contentDescription = null,
                     modifier = Modifier
                         .size(60.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    filterQuality = FilterQuality.None
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -427,12 +436,17 @@ fun HistoryCard(
                     }
                     if (imageModel != null) {
                         AsyncImage(
-                            model = imageModel,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(imageModel)
+                                .size(Size.ORIGINAL)
+                                .crossfade(false)
+                                .build(),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(60.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            filterQuality = FilterQuality.None
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                     }
