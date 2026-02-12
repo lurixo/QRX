@@ -74,9 +74,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -152,13 +154,17 @@ fun HistoryMainScreen(
                         }
                     },
                     actions = {
-                        AnimatedVisibility(
-                            visible = totalCount > 0,
-                            enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                            exit = fadeOut(animationSpec = MD3Motion.standardSpec())
-                        ) {
-                            IconButton(onClick = { deleteAll() }) {
-                                Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                        AnimatedContent(
+                            targetState = totalCount > 0,
+                            transitionSpec = { MD3Transitions.fadeThrough() },
+                            label = "historyMainActionsTransition"
+                        ) { hasHistory ->
+                            if (hasHistory) {
+                                IconButton(onClick = { deleteAll() }) {
+                                    Icon(Icons.Default.Delete, stringResource(R.string.clear), tint = MaterialTheme.colorScheme.primary)
+                                }
+                            } else {
+                                Box(modifier = Modifier.size(48.dp))
                             }
                         }
                     }
@@ -328,6 +334,7 @@ fun ScanHistoryListScreen(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
@@ -471,7 +478,19 @@ fun ScanHistoryListScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (isSelectionMode) stringResource(R.string.selected_count, selectedIds.size) else title) },
+                    title = {
+                        Crossfade(
+                            targetState = isSelectionMode to selectedIds.size,
+                            animationSpec = MD3Motion.standardSpec(),
+                            label = "scanHistoryTitleCrossfade"
+                        ) { (inSelectionMode, count) ->
+                            if (inSelectionMode) {
+                                Text(stringResource(R.string.selected_count, count))
+                            } else {
+                                Text(title)
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
                         IconButton(onClick = { if (isSelectionMode) exitSelectionMode() else onNavigateBack() }) {
@@ -640,7 +659,7 @@ fun ScanHistoryListScreen(
                                 isSelectionMode = isSelectionMode,
                                 isSelected = history.id in selectedIds,
                                 onToggleSelect = { selectedIds = if (history.id in selectedIds) selectedIds - history.id else selectedIds + history.id },
-                                onLongPress = { if (!isSelectionMode) { isSelectionMode = true; selectedIds = setOf(history.id) } },
+                                onLongPress = { if (!isSelectionMode) { haptic.performHapticFeedback(HapticFeedbackType.LongPress); isSelectionMode = true; selectedIds = setOf(history.id) } },
                                 onShowSnackbar = { message, isSuccess -> snackbarData = SnackbarData(message, isSuccess) },
                                 modifier = Modifier.animateItem(
                                     fadeInSpec = MD3ListAnimations.fadeInSpec(index),
@@ -671,6 +690,7 @@ fun GenerateHistoryListScreen(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
@@ -815,7 +835,19 @@ fun GenerateHistoryListScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (isSelectionMode) stringResource(R.string.selected_count, selectedIds.size) else title) },
+                    title = {
+                        Crossfade(
+                            targetState = isSelectionMode to selectedIds.size,
+                            animationSpec = MD3Motion.standardSpec(),
+                            label = "generateHistoryTitleCrossfade"
+                        ) { (inSelectionMode, count) ->
+                            if (inSelectionMode) {
+                                Text(stringResource(R.string.selected_count, count))
+                            } else {
+                                Text(title)
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
                         IconButton(onClick = { if (isSelectionMode) exitSelectionMode() else onNavigateBack() }) {
@@ -988,7 +1020,7 @@ fun GenerateHistoryListScreen(
                                         expandedContentIds + history.id
                                 },
                                 onToggleSelect = { selectedIds = if (history.id in selectedIds) selectedIds - history.id else selectedIds + history.id },
-                                onLongPress = { if (!isSelectionMode) { isSelectionMode = true; selectedIds = setOf(history.id) } },
+                                onLongPress = { if (!isSelectionMode) { haptic.performHapticFeedback(HapticFeedbackType.LongPress); isSelectionMode = true; selectedIds = setOf(history.id) } },
                                 modifier = Modifier.animateItem(
                                     fadeInSpec = MD3ListAnimations.fadeInSpec(index),
                                     fadeOutSpec = MD3ListAnimations.fadeOutSpec(),

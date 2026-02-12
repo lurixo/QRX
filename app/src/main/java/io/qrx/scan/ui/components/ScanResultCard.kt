@@ -217,8 +217,14 @@ fun ScanResultCard(
 
                 AnimatedVisibility(
                     visible = !isSelectionMode,
-                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                    enter = scaleIn(
+                        animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                        initialScale = 0.6f
+                    ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = scaleOut(
+                        animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                        targetScale = 0.6f
+                    ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                 ) {
                     IconButton(
                         onClick = onDelete,

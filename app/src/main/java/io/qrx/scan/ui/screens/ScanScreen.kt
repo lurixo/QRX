@@ -122,54 +122,59 @@ fun ScanScreen(
                 }
             }
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = RoundedCornerShape(16.dp)
+            AnimatedVisibility(
+                visible = true,
+                enter = MD3StateAnimations.contentEnter()
             ) {
-                Column {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        MD3ActionButton(
-                            icon = Icons.Default.QrCodeScanner,
-                            text = stringResource(R.string.scan),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                context.startActivity(Intent(context, ScanActivity::class.java))
-                            }
-                        )
-                        MD3ActionButton(
-                            icon = Icons.Outlined.Photo,
-                            text = stringResource(R.string.select_image),
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                            }
-                        )
-                    }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            MD3ActionButton(
+                                icon = Icons.Default.QrCodeScanner,
+                                text = stringResource(R.string.scan),
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    context.startActivity(Intent(context, ScanActivity::class.java))
+                                }
+                            )
+                            MD3ActionButton(
+                                icon = Icons.Outlined.Photo,
+                                text = stringResource(R.string.select_image),
+                                modifier = Modifier.weight(1f),
+                                onClick = {
+                                    photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                }
+                            )
+                        }
 
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        MD3ActionButton(
-                            icon = Icons.Default.QrCode2,
-                            text = stringResource(R.string.generate_qrcode),
-                            modifier = Modifier.weight(1f),
-                            onClick = onNavigateToQRGenerate
-                        )
-                        MD3ActionButton(
-                            icon = Icons.Outlined.ViewWeek,
-                            text = stringResource(R.string.generate_barcode),
-                            modifier = Modifier.weight(1f),
-                            onClick = onNavigateToBarcodeGenerate
-                        )
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            MD3ActionButton(
+                                icon = Icons.Default.QrCode2,
+                                text = stringResource(R.string.generate_qrcode),
+                                modifier = Modifier.weight(1f),
+                                onClick = onNavigateToQRGenerate
+                            )
+                            MD3ActionButton(
+                                icon = Icons.Outlined.ViewWeek,
+                                text = stringResource(R.string.generate_barcode),
+                                modifier = Modifier.weight(1f),
+                                onClick = onNavigateToBarcodeGenerate
+                            )
+                        }
                     }
                 }
             }

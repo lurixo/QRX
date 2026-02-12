@@ -74,8 +74,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
@@ -132,6 +134,7 @@ fun BarcodeGenerateScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val haptic = LocalHapticFeedback.current
     val database = (context.applicationContext as QRXApplication).database
     val scrollState = rememberScrollState()
 
@@ -369,7 +372,17 @@ fun BarcodeGenerateScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (isSelectionMode) stringResource(R.string.selected_count, selectedIds.size) else stringResource(R.string.generate_barcode))
+                    Crossfade(
+                        targetState = isSelectionMode to selectedIds.size,
+                        animationSpec = MD3Motion.standardSpec(),
+                        label = "barcodeGenerateTitleCrossfade"
+                    ) { (inSelectionMode, count) ->
+                        if (inSelectionMode) {
+                            Text(stringResource(R.string.selected_count, count))
+                        } else {
+                            Text(stringResource(R.string.generate_barcode))
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -486,6 +499,7 @@ fun BarcodeGenerateScreen(
                             },
                             onLongPress = {
                                 if (!isSelectionMode && item.bitmap != null) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isSelectionMode = true
                                     selectedIds = setOf(item.id)
                                 }
@@ -646,8 +660,14 @@ fun BarcodeItemCard(
 
                 AnimatedVisibility(
                     visible = showDelete,
-                    enter = fadeIn(animationSpec = MD3Motion.standardSpec()),
-                    exit = fadeOut(animationSpec = MD3Motion.standardSpec())
+                    enter = scaleIn(
+                        animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
+                        initialScale = 0.6f
+                    ) + fadeIn(animationSpec = MD3Motion.standardSpec()),
+                    exit = scaleOut(
+                        animationSpec = MD3Motion.emphasizedAccelerateSpec(MD3Motion.Duration.SHORT2),
+                        targetScale = 0.6f
+                    ) + fadeOut(animationSpec = MD3Motion.standardSpec())
                 ) {
                     IconButton(
                         onClick = onDelete,

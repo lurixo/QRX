@@ -51,8 +51,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -113,6 +115,7 @@ fun ImageScanScreen(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
@@ -303,10 +306,17 @@ fun ImageScanScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            if (isSelectionMode) stringResource(R.string.selected_count, selectedIds.size)
-                            else stringResource(R.string.image_scan)
-                        )
+                        Crossfade(
+                            targetState = isSelectionMode to selectedIds.size,
+                            animationSpec = MD3Motion.standardSpec(),
+                            label = "imageScanTitleCrossfade"
+                        ) { (inSelectionMode, count) ->
+                            if (inSelectionMode) {
+                                Text(stringResource(R.string.selected_count, count))
+                            } else {
+                                Text(stringResource(R.string.image_scan))
+                            }
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
                     navigationIcon = {
@@ -451,6 +461,7 @@ fun ImageScanScreen(
                                 },
                                 onLongPress = {
                                     if (!isSelectionMode && !result.isProcessing) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         isSelectionMode = true
                                         selectedIds = setOf(result.id)
                                     }
