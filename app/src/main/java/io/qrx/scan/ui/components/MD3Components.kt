@@ -150,14 +150,19 @@ fun Modifier.cardGestures(
         val down = awaitFirstDown(pass = PointerEventPass.Final, requireUnconsumed = false)
         if (down.isConsumed) return@awaitEachGesture
 
+        var handled = false
         try {
             withTimeout(viewConfiguration.longPressTimeoutMillis) {
                 while (true) {
                     val event = awaitPointerEvent(PointerEventPass.Final)
-                    if (event.changes.any { it.isConsumed }) return@awaitEachGesture
+                    if (event.changes.any { it.isConsumed }) {
+                        handled = true
+                        break
+                    }
                     if (event.changes.all { !it.pressed }) {
                         onClick()
-                        return@awaitEachGesture
+                        handled = true
+                        break
                     }
                 }
             }
@@ -166,6 +171,7 @@ fun Modifier.cardGestures(
             do {
                 val event = awaitPointerEvent(PointerEventPass.Final)
             } while (event.changes.any { it.pressed })
+            handled = true
         }
     }
 }
