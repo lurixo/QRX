@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -31,6 +32,11 @@ class RubberBandOverscrollEffect(
 
     @Volatile
     private var containerHeight = 800f
+
+    val snappedOffset: Float
+        get() = if (abs(overscrollOffset.value) > 0.5f)
+            overscrollOffset.value.roundToInt().toFloat()
+        else 0f
 
     private fun dampingFactor(currentOffset: Float): Float {
         val maxOffset = containerHeight * 0.3f
@@ -107,15 +113,14 @@ class RubberBandOverscrollEffect(
             val placeable = measurable.measure(constraints)
             containerHeight = placeable.height.toFloat()
             return layout(placeable.width, placeable.height) {
-                placeable.placeWithLayer(0, 0) {
-                    translationY = if (abs(overscrollOffset.value) > 0.5f)
-                        overscrollOffset.value.roundToInt().toFloat()
-                    else 0f
-                }
+                placeable.place(0, 0)
             }
         }
     }
 }
+
+fun Modifier.rubberBandOffset(effect: RubberBandOverscrollEffect): Modifier =
+    graphicsLayer { translationY = effect.snappedOffset }
 
 @Composable
 fun rememberRubberBandOverscrollEffect(): RubberBandOverscrollEffect {

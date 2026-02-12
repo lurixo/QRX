@@ -62,6 +62,7 @@ import io.qrx.scan.R
 import io.qrx.scan.data.ScanHistoryEntity
 import io.qrx.scan.data.ScanSource
 import io.qrx.scan.ui.animation.rememberRubberBandOverscrollEffect
+import io.qrx.scan.ui.animation.rubberBandOffset
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3StateAnimations
@@ -414,11 +415,12 @@ fun ImageScanScreen(
                         }
                     }
                 } else {
+                    val rubberBandOverscroll = rememberRubberBandOverscrollEffect()
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier.fillMaxSize().padding(paddingValues).rubberBandOffset(rubberBandOverscroll),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = rememberRubberBandOverscrollEffect()
+                        overscrollEffect = rubberBandOverscroll
                     ) {
                         if (!isScanning && scanResults.isNotEmpty() && !isSelectionMode) {
                             item {
