@@ -88,8 +88,7 @@ import io.qrx.scan.R
 import io.qrx.scan.data.GenerateHistoryEntity
 import io.qrx.scan.data.GenerateType
 import io.qrx.scan.data.ScanSource
-import io.qrx.scan.ui.animation.rememberRubberBandOverscrollEffect
-import io.qrx.scan.ui.animation.rubberBandOffset
+import io.qrx.scan.ui.animation.rememberEdgeGlowOverscrollEffect
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3Motion
@@ -192,12 +191,11 @@ fun HistoryMainScreen(
                         }
                     }
                 } else {
-                    val rubberBandOverscroll = rememberRubberBandOverscrollEffect()
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues).rubberBandOffset(rubberBandOverscroll),
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = rubberBandOverscroll
+                        overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
                         item {
                             Text(
@@ -602,12 +600,11 @@ fun ScanHistoryListScreen(
                         }
                     }
                 } else {
-                    val rubberBandOverscroll = rememberRubberBandOverscrollEffect()
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues).rubberBandOffset(rubberBandOverscroll),
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = rubberBandOverscroll
+                        overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             HistoryCard(
@@ -941,12 +938,11 @@ fun GenerateHistoryListScreen(
                         }
                     }
                 } else {
-                    val rubberBandOverscroll = rememberRubberBandOverscrollEffect()
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues).rubberBandOffset(rubberBandOverscroll),
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = rubberBandOverscroll
+                        overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             GenerateHistoryCard(
