@@ -65,6 +65,7 @@ import io.qrx.scan.data.ScanSource
 import io.qrx.scan.ui.animation.rememberEdgeGlowOverscrollEffect
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
+import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3StateAnimations
 import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.components.MD3PressableSurface
