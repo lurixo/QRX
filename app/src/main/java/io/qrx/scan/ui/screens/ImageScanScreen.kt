@@ -61,6 +61,7 @@ import io.qrx.scan.QRXApplication
 import io.qrx.scan.R
 import io.qrx.scan.data.ScanHistoryEntity
 import io.qrx.scan.data.ScanSource
+import io.qrx.scan.ui.animation.rememberRubberBandOverscrollEffect
 import io.qrx.scan.ui.animation.MD3FabAnimations
 import io.qrx.scan.ui.animation.MD3ListAnimations
 import io.qrx.scan.ui.animation.MD3StateAnimations
@@ -417,7 +418,7 @@ fun ImageScanScreen(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        overscrollEffect = null
+                        overscrollEffect = rememberRubberBandOverscrollEffect()
                     ) {
                         if (!isScanning && scanResults.isNotEmpty() && !isSelectionMode) {
                             item {
