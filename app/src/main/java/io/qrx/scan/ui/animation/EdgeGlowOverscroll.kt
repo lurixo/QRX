@@ -86,7 +86,7 @@ class EdgeGlowOverscrollEffect(
         val remainingVelocity = performFling(velocity)
 
         if (abs(overscrollOffset.value) > 0.5f) {
-            scope.launch {
+            try {
                 overscrollOffset.animateTo(
                     targetValue = 0f,
                     animationSpec = spring(
@@ -94,6 +94,8 @@ class EdgeGlowOverscrollEffect(
                         stiffness = Spring.StiffnessMediumLow
                     )
                 )
+            } finally {
+                overscrollOffset.snapTo(0f)
             }
         }
     }
