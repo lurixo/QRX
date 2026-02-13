@@ -45,7 +45,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ViewWeek
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -1261,13 +1260,14 @@ fun CopyLineBreakToggle(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = 4.dp, vertical = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange
+        MD3SelectionIcon(
+            selected = checked,
+            modifier = Modifier.size(22.dp)
         )
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = stringResource(R.string.copy_without_linebreaks),
             style = MaterialTheme.typography.bodyMedium,
