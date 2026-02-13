@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -457,8 +456,8 @@ fun HistoryCard(
                             IconButton(
                                 onClick = {
                                     pulseScope.launch {
-                                        deleteScale.animateTo(0.75f, tween(50))
-                                        deleteScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                        deleteScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
+                                        deleteScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
                                     }
                                     onDelete()
                                 },
@@ -474,8 +473,8 @@ fun HistoryCard(
                             IconButton(
                                 onClick = {
                                     pulseScope.launch {
-                                        copyScale.animateTo(0.75f, tween(50))
-                                        copyScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                        copyScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
+                                        copyScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
                                     }
                                     onCopy()
                                 },
@@ -491,8 +490,8 @@ fun HistoryCard(
                             IconButton(
                                 onClick = {
                                     pulseScope.launch {
-                                        saveScale.animateTo(0.75f, tween(50))
-                                        saveScale.animateTo(1f, tween(150, easing = MD3Motion.EmphasizedDecelerate))
+                                        saveScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
+                                        saveScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
                                     }
                                     onSave()
                                 },
