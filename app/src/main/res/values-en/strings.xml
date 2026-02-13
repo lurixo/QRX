@@ -95,6 +95,7 @@
     <string name="cannot_open_link">Cannot open link</string>
     <string name="process_failed">Process failed</string>
     <string name="process_image_error">Error processing image</string>
+    <string name="scanning_in_progress">Scanning in progress, please wait</string>
     <string name="camera_permission_required">Camera permission required</string>
     <string name="camera_permission_rationale">Camera permission is required to scan barcodes and QR codes</string>
     <string name="camera_permission_denied">Camera permission denied</string>
