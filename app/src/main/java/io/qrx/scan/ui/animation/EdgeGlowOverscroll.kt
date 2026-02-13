@@ -102,8 +102,15 @@ class EdgeGlowOverscrollEffect(
         }
     }
 
+    /**
+     * Keep the overscroll glow purely visual.
+     *
+     * Reporting in-progress state here causes Compose's scroll pipeline to treat the effect as an
+     * active interaction while the spring-back animation is running, which can delay click
+     * handling for unrelated buttons until the glow settles.
+     */
     override val isInProgress: Boolean
-        get() = abs(overscrollOffset.value) > 0.5f
+        get() = false
 
     override val node: DelegatableNode = object : Modifier.Node(), DrawModifierNode {
         override fun ContentDrawScope.draw() {
