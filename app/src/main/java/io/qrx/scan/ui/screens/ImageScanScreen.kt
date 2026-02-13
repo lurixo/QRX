@@ -75,6 +75,7 @@ import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.ScanResultCard
 import io.qrx.scan.ui.components.SnackbarData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -123,12 +124,14 @@ fun ImageScanScreen(
     val strRecognizeFailed = stringResource(R.string.recognize_failed)
     val strProcessFailed = stringResource(R.string.process_failed)
     val strProcessImageError = stringResource(R.string.process_image_error)
+    val strScanningInProgress = stringResource(R.string.scanning_in_progress)
 
     var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
     var isScanning by remember { mutableStateOf(false) }
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var processingJob by remember { mutableStateOf<Job?>(null) }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -137,6 +140,12 @@ fun ImageScanScreen(
 
     fun processImages(uris: List<Uri>) {
         if (uris.isEmpty()) return
+
+        if (processingJob?.isActive == true) {
+            snackbarData = SnackbarData(strScanningInProgress, false)
+            return
+        }
+
         isScanning = true
 
         val existingUris = scanResults.map { it.uri }.toSet()
@@ -155,7 +164,7 @@ fun ImageScanScreen(
 
         scanResults = scanResults + newResults
 
-        scope.launch {
+        processingJob = scope.launch {
             try {
                 val scanner = BarcodeScanning.getClient()
                 val processedCodeSets = scanResults
@@ -352,6 +361,7 @@ fun ImageScanScreen(
                                     }
                                 } else {
                                     IconButton(
+                                        enabled = !isScanning,
                                         onClick = {
                                             photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                                         }

@@ -95,6 +95,7 @@
     <string name="cannot_open_link">无法打开链接</string>
     <string name="process_failed">处理失败</string>
     <string name="process_image_error">处理图片时出错</string>
+    <string name="scanning_in_progress">正在识别，请稍候</string>
     <string name="camera_permission_required">需要相机权限</string>
     <string name="camera_permission_rationale">扫一扫功能需要使用相机来识别条码和二维码</string>
     <string name="camera_permission_denied">相机权限被拒绝</string>
