@@ -487,7 +487,7 @@ fun MD3ToggleIcon(
     tint: Color = MaterialTheme.colorScheme.primary
 ) {
     val scale by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (isOn) 1f else 0.9f,
         animationSpec = MD3Motion.emphasizedDecelerateSpec(MD3Motion.Duration.SHORT3),
         label = "toggleScale"
     )

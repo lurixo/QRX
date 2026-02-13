@@ -297,7 +297,7 @@ object MD3StateAnimations {
 
     fun emptyStateEnter(): EnterTransition =
         fadeIn(
-            tween(MD3Motion.Duration.MEDIUM4, easing = MD3Motion.StandardDecelerate)
+            tween(MD3Motion.Duration.MEDIUM4, easing = MD3Motion.EmphasizedDecelerate)
         ) + scaleIn(
             initialScale = 0.8f,
             animationSpec = tween(MD3Motion.Duration.MEDIUM4, easing = MD3Motion.EmphasizedDecelerate)

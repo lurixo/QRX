@@ -599,7 +599,7 @@ fun ScanOverlay(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
+            animation = tween(MD3Motion.Duration.EXTRA_LONG4 * 2, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "scanLinePosition"
