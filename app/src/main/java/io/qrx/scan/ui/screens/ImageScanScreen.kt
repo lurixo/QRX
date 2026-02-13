@@ -74,6 +74,7 @@ import io.qrx.scan.ui.components.MD3PressableSurface
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.ScanResultCard
 import io.qrx.scan.ui.components.SnackbarData
+import io.qrx.scan.util.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -126,12 +127,15 @@ fun ImageScanScreen(
     val strProcessImageError = stringResource(R.string.process_image_error)
     val strScanningInProgress = stringResource(R.string.scanning_in_progress)
 
+    val preferencesManager = remember { PreferencesManager(context) }
+
     var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
     var isScanning by remember { mutableStateOf(false) }
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
     var processingJob by remember { mutableStateOf<Job?>(null) }
+    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
 
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
@@ -294,7 +298,8 @@ fun ImageScanScreen(
             .flatMap { it.codes }
             .distinct()
         if (codes.isNotEmpty()) {
-            clipboardManager.setText(AnnotatedString(codes.joinToString("\n")))
+            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            clipboardManager.setText(AnnotatedString(codes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, codes.size), true)
         }
         exitSelectionMode()
@@ -305,7 +310,8 @@ fun ImageScanScreen(
             .flatMap { it.codes }
             .distinct()
         if (codes.isNotEmpty()) {
-            clipboardManager.setText(AnnotatedString(codes.joinToString("\n")))
+            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            clipboardManager.setText(AnnotatedString(codes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, codes.size), true)
         }
     }
@@ -451,6 +457,15 @@ fun ImageScanScreen(
                         if (!isScanning && scanResults.isNotEmpty() && !isSelectionMode) {
                             item {
                                 StatisticsCard(scanResults)
+                            }
+                            item {
+                                CopyLineBreakToggle(
+                                    checked = copyWithoutLineBreaks,
+                                    onCheckedChange = {
+                                        copyWithoutLineBreaks = it
+                                        preferencesManager.copyWithoutLineBreaks = it
+                                    }
+                                )
                             }
                         }
 

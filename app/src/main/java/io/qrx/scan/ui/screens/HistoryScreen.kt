@@ -45,6 +45,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ViewWeek
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -99,6 +100,7 @@ import io.qrx.scan.ui.components.MD3SelectionIcon
 import io.qrx.scan.ui.components.QRXSnackbar
 import io.qrx.scan.ui.components.SnackbarData
 import io.qrx.scan.ui.components.cardGestures
+import io.qrx.scan.util.PreferencesManager
 import io.qrx.scan.util.formatTimestamp
 import io.qrx.scan.util.saveToGalleryOnly
 import kotlinx.coroutines.Dispatchers
@@ -335,10 +337,13 @@ fun ScanHistoryListScreen(
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
+    val preferencesManager = remember { PreferencesManager(context) }
+
     val historyList by database.scanHistoryDao().getHistoryBySource(source).collectAsState(initial = emptyList())
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
 
     val title = stringResource(if (source == ScanSource.CAMERA) R.string.camera_scan else R.string.image_scan)
 
@@ -373,7 +378,8 @@ fun ScanHistoryListScreen(
         val selectedItems = historyList.filter { it.id in selectedIds }
         val allCodes = selectedItems.flatMap { it.codes }.distinct()
         if (allCodes.isNotEmpty()) {
-            clipboardManager.setText(AnnotatedString(allCodes.joinToString("\n")))
+            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            clipboardManager.setText(AnnotatedString(allCodes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
         }
         exitSelectionMode()
@@ -543,7 +549,8 @@ fun ScanHistoryListScreen(
                         MD3PressableSurface(
                             onClick = {
                                 val allCodes = historyList.flatMap { it.codes }.distinct()
-                                clipboardManager.setText(AnnotatedString(allCodes.joinToString("\n")))
+                                val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                clipboardManager.setText(AnnotatedString(allCodes.joinToString(separator)))
                                 snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
                             },
                             shape = RoundedCornerShape(16.dp),
@@ -633,6 +640,15 @@ fun ScanHistoryListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
+                        item {
+                            CopyLineBreakToggle(
+                                checked = copyWithoutLineBreaks,
+                                onCheckedChange = {
+                                    copyWithoutLineBreaks = it
+                                    preferencesManager.copyWithoutLineBreaks = it
+                                }
+                            )
+                        }
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             HistoryCard(
                                 imageUri = history.imageUri,
@@ -650,7 +666,8 @@ fun ScanHistoryListScreen(
                                 },
                                 onSave = { saveSingleItem(history.imageUri) },
                                 onCopy = {
-                                    clipboardManager.setText(AnnotatedString(history.codes.joinToString("\n")))
+                                    val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                    clipboardManager.setText(AnnotatedString(history.codes.joinToString(separator)))
                                     snackbarData = SnackbarData(context.getString(R.string.copied_results, history.codes.size), true)
                                 },
                                 isSelectionMode = isSelectionMode,
@@ -691,11 +708,14 @@ fun GenerateHistoryListScreen(
     val scope = rememberCoroutineScope()
     val database = (context.applicationContext as QRXApplication).database
 
+    val preferencesManager = remember { PreferencesManager(context) }
+
     val historyList by database.generateHistoryDao().getByType(type).collectAsState(initial = emptyList())
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var expandedContentIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
+    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
 
     val title = if (type == GenerateType.QR_CODE) stringResource(R.string.qrcode_generate) else stringResource(R.string.barcode_generate)
 
@@ -730,7 +750,8 @@ fun GenerateHistoryListScreen(
         val selectedItems = historyList.filter { it.id in selectedIds }
         val allContent = selectedItems.map { it.content }.distinct()
         if (allContent.isNotEmpty()) {
-            clipboardManager.setText(AnnotatedString(allContent.joinToString("\n")))
+            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            clipboardManager.setText(AnnotatedString(allContent.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
         }
         exitSelectionMode()
@@ -900,7 +921,8 @@ fun GenerateHistoryListScreen(
                         MD3PressableSurface(
                             onClick = {
                                 val allContent = historyList.map { it.content }.distinct()
-                                clipboardManager.setText(AnnotatedString(allContent.joinToString("\n")))
+                                val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                clipboardManager.setText(AnnotatedString(allContent.joinToString(separator)))
                                 snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
                             },
                             shape = RoundedCornerShape(16.dp),
@@ -990,6 +1012,15 @@ fun GenerateHistoryListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
+                        item {
+                            CopyLineBreakToggle(
+                                checked = copyWithoutLineBreaks,
+                                onCheckedChange = {
+                                    copyWithoutLineBreaks = it
+                                    preferencesManager.copyWithoutLineBreaks = it
+                                }
+                            )
+                        }
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             GenerateHistoryCard(
                                 history = history,
@@ -1218,5 +1249,29 @@ fun GenerateHistoryCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun CopyLineBreakToggle(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+        Text(
+            text = stringResource(R.string.copy_without_linebreaks),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
