@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,12 +44,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
@@ -65,7 +62,7 @@ import io.qrx.scan.ui.animation.MD3Motion
 import io.qrx.scan.ui.animation.MD3Transitions
 import io.qrx.scan.ui.screens.ScanResult
 import io.qrx.scan.util.formatTimestamp
-import kotlinx.coroutines.launch
+
 
 private fun isUrl(text: String): Boolean {
     return Patterns.WEB_URL.matcher(text).matches() ||
@@ -383,11 +380,6 @@ fun HistoryCard(
         label = "historyCardColor"
     )
 
-    val deleteScale = remember { Animatable(1f) }
-    val copyScale = remember { Animatable(1f) }
-    val saveScale = remember { Animatable(1f) }
-    val pulseScope = rememberCoroutineScope()
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -454,14 +446,7 @@ fun HistoryCard(
                     ) {
                         Column {
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        deleteScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        deleteScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onDelete()
-                                },
-                                modifier = Modifier.scale(deleteScale.value)
+                                onClick = onDelete
                             ) {
                                 Icon(
                                     Icons.Default.Close,
@@ -471,14 +456,7 @@ fun HistoryCard(
                                 )
                             }
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        copyScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        copyScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onCopy()
-                                },
-                                modifier = Modifier.scale(copyScale.value)
+                                onClick = onCopy
                             ) {
                                 Icon(
                                     Icons.Outlined.ContentCopy,
@@ -488,14 +466,7 @@ fun HistoryCard(
                                 )
                             }
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        saveScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        saveScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onSave()
-                                },
-                                modifier = Modifier.scale(saveScale.value)
+                                onClick = onSave
                             ) {
                                 Icon(
                                     Icons.Default.Save,
