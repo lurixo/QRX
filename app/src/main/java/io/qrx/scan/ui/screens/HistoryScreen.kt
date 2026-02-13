@@ -10,7 +10,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +64,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.lerp
@@ -1092,11 +1090,6 @@ fun GenerateHistoryCard(
 
     var hasOverflow by remember { mutableStateOf(false) }
 
-    val deleteScale = remember { Animatable(1f) }
-    val copyScale = remember { Animatable(1f) }
-    val saveScale = remember { Animatable(1f) }
-    val pulseScope = rememberCoroutineScope()
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -1187,38 +1180,17 @@ fun GenerateHistoryCard(
                     ) {
                         Column {
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        deleteScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        deleteScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onDelete()
-                                },
-                                modifier = Modifier.scale(deleteScale.value)
+                                onClick = onDelete
                             ) {
                                 Icon(Icons.Default.Close, stringResource(R.string.delete), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        copyScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        copyScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onCopy()
-                                },
-                                modifier = Modifier.scale(copyScale.value)
+                                onClick = onCopy
                             ) {
                                 Icon(Icons.Outlined.ContentCopy, stringResource(R.string.copy), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(
-                                onClick = {
-                                    pulseScope.launch {
-                                        saveScale.animateTo(0.75f, MD3Motion.pressSpecFast(isPressed = true))
-                                        saveScale.animateTo(1f, MD3Motion.pressSpecFast(isPressed = false))
-                                    }
-                                    onSave()
-                                },
-                                modifier = Modifier.scale(saveScale.value)
+                                onClick = onSave
                             ) {
                                 Icon(Icons.Default.Save, stringResource(R.string.save), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
                             }
