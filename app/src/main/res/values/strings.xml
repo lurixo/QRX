@@ -125,4 +125,5 @@
     <string name="stat_codes">识别码</string>
     <string name="camera_scan">相机扫描</string>
     <string name="no_history_plain">暂无历史记录</string>
+    <string name="copy_without_linebreaks">复制时不使用换行分隔</string>
 </resources>
