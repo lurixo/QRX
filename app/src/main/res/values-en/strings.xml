@@ -125,4 +125,5 @@
     <string name="stat_codes">Codes</string>
     <string name="camera_scan">Camera Scan</string>
     <string name="no_history_plain">No history</string>
+    <string name="copy_without_linebreaks">Copy without line breaks</string>
 </resources>
