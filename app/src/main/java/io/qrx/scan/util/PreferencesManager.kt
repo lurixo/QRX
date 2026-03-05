@@ -11,7 +11,7 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_COPY_WITHOUT_LINE_BREAKS, true)
         set(value) = prefs.edit().putBoolean(KEY_COPY_WITHOUT_LINE_BREAKS, value).apply()
 
-    fun getCopySeparator(): String = if (copyWithoutLineBreaks) ", " else "\n"
+    fun getCopySeparator(): String = "\n"
 
     companion object {
         private const val KEY_COPY_WITHOUT_LINE_BREAKS = "copy_without_line_breaks"

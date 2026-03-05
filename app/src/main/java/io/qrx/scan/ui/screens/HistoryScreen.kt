@@ -340,8 +340,6 @@ fun ScanHistoryListScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
-
     val title = stringResource(if (source == ScanSource.CAMERA) R.string.camera_scan else R.string.image_scan)
 
     BackHandler(enabled = isSelectionMode) {
@@ -375,7 +373,7 @@ fun ScanHistoryListScreen(
         val selectedItems = historyList.filter { it.id in selectedIds }
         val allCodes = selectedItems.flatMap { it.codes }.distinct()
         if (allCodes.isNotEmpty()) {
-            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            val separator = "\n"
             clipboardManager.setText(AnnotatedString(allCodes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
         }
@@ -546,7 +544,7 @@ fun ScanHistoryListScreen(
                         MD3PressableSurface(
                             onClick = {
                                 val allCodes = historyList.flatMap { it.codes }.distinct()
-                                val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                val separator = "\n"
                                 clipboardManager.setText(AnnotatedString(allCodes.joinToString(separator)))
                                 snackbarData = SnackbarData(context.getString(R.string.copied_results, allCodes.size), true)
                             },
@@ -637,15 +635,6 @@ fun ScanHistoryListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
-                        item {
-                            CopyLineBreakToggle(
-                                checked = copyWithoutLineBreaks,
-                                onCheckedChange = {
-                                    copyWithoutLineBreaks = it
-                                    preferencesManager.copyWithoutLineBreaks = it
-                                }
-                            )
-                        }
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             HistoryCard(
                                 imageUri = history.imageUri,
@@ -663,7 +652,7 @@ fun ScanHistoryListScreen(
                                 },
                                 onSave = { saveSingleItem(history.imageUri) },
                                 onCopy = {
-                                    val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                    val separator = "\n"
                                     clipboardManager.setText(AnnotatedString(history.codes.joinToString(separator)))
                                     snackbarData = SnackbarData(context.getString(R.string.copied_results, history.codes.size), true)
                                 },
@@ -712,8 +701,6 @@ fun GenerateHistoryListScreen(
     var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var expandedContentIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
-    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
-
     val title = if (type == GenerateType.QR_CODE) stringResource(R.string.qrcode_generate) else stringResource(R.string.barcode_generate)
 
     BackHandler(enabled = isSelectionMode) {
@@ -747,7 +734,7 @@ fun GenerateHistoryListScreen(
         val selectedItems = historyList.filter { it.id in selectedIds }
         val allContent = selectedItems.map { it.content }.distinct()
         if (allContent.isNotEmpty()) {
-            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            val separator = "\n"
             clipboardManager.setText(AnnotatedString(allContent.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
         }
@@ -918,7 +905,7 @@ fun GenerateHistoryListScreen(
                         MD3PressableSurface(
                             onClick = {
                                 val allContent = historyList.map { it.content }.distinct()
-                                val separator = if (copyWithoutLineBreaks) ", " else "\n"
+                                val separator = "\n"
                                 clipboardManager.setText(AnnotatedString(allContent.joinToString(separator)))
                                 snackbarData = SnackbarData(context.getString(R.string.copied_results, allContent.size), true)
                             },
@@ -1009,15 +996,6 @@ fun GenerateHistoryListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         overscrollEffect = rememberEdgeGlowOverscrollEffect()
                     ) {
-                        item {
-                            CopyLineBreakToggle(
-                                checked = copyWithoutLineBreaks,
-                                onCheckedChange = {
-                                    copyWithoutLineBreaks = it
-                                    preferencesManager.copyWithoutLineBreaks = it
-                                }
-                            )
-                        }
                         itemsIndexed(historyList, key = { _, it -> it.id }) { index, history ->
                             GenerateHistoryCard(
                                 history = history,
@@ -1223,27 +1201,3 @@ fun GenerateHistoryCard(
     }
 }
 
-@Composable
-fun CopyLineBreakToggle(
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        MD3SelectionIcon(
-            selected = checked,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = stringResource(R.string.copy_without_linebreaks),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}

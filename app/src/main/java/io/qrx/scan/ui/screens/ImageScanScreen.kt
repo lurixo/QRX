@@ -135,8 +135,6 @@ fun ImageScanScreen(
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var snackbarData by remember { mutableStateOf<SnackbarData?>(null) }
     var processingJob by remember { mutableStateOf<Job?>(null) }
-    var copyWithoutLineBreaks by remember { mutableStateOf(preferencesManager.copyWithoutLineBreaks) }
-
     BackHandler(enabled = isSelectionMode) {
         isSelectionMode = false
         selectedIds = emptySet()
@@ -298,7 +296,7 @@ fun ImageScanScreen(
             .flatMap { it.codes }
             .distinct()
         if (codes.isNotEmpty()) {
-            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            val separator = "\n"
             clipboardManager.setText(AnnotatedString(codes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, codes.size), true)
         }
@@ -310,7 +308,7 @@ fun ImageScanScreen(
             .flatMap { it.codes }
             .distinct()
         if (codes.isNotEmpty()) {
-            val separator = if (copyWithoutLineBreaks) ", " else "\n"
+            val separator = "\n"
             clipboardManager.setText(AnnotatedString(codes.joinToString(separator)))
             snackbarData = SnackbarData(context.getString(R.string.copied_results, codes.size), true)
         }
@@ -457,15 +455,6 @@ fun ImageScanScreen(
                         if (!isScanning && scanResults.isNotEmpty() && !isSelectionMode) {
                             item {
                                 StatisticsCard(scanResults)
-                            }
-                            item {
-                                CopyLineBreakToggle(
-                                    checked = copyWithoutLineBreaks,
-                                    onCheckedChange = {
-                                        copyWithoutLineBreaks = it
-                                        preferencesManager.copyWithoutLineBreaks = it
-                                    }
-                                )
                             }
                         }
 
